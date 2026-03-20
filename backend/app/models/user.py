@@ -1,10 +1,8 @@
-from plistlib import UID
-from tokenize import Triple
 import uuid
 import enum
 
 from app.db.base import Base
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from sqlalchemy.orm import mapped_column, Mapped
 from sqlalchemy.dialects.postgresql import UUID
@@ -83,5 +81,24 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         nullable=False,
-        default=datetime.utcnow
+        default=datetime.now(timezone.utc)
     )
+
+    #CВЯЗЬ
+
+    @property
+    def is_admin(self):
+        return self.role == UserRole.ADMIN
+    
+    @property
+    def is_psychology(self):
+        return self.role == UserRole.PSYCHOLOGY
+    
+    @property
+    def has_active_access(self) -> bool:
+        """Проверка активности доступа"""
+        if self.is_blocked:
+            return False
+        if self.access_until is None:
+            return True
+        return datetime.now(timezone.utc) < self.access_until
