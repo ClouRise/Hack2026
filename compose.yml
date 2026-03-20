@@ -1,0 +1,38 @@
+networks:
+  dev:
+
+services:
+  db:
+    image: postgres:17.4
+    restart: unless-stopped
+    shm_size: 256
+    environment:
+      - POSTGRES_USER=hackathon_user
+      - POSTGRES_PASSWORD=123123
+      - POSTGRES_HOST=localhost
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=hackathon_db
+
+    volumes:
+      - .:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d "] #дописать имя БД
+      interval: 10s
+      timeout: 30s
+      retries: 5
+
+    ports:
+      - 5432:5432
+
+    networks:
+      - dev
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - dev
+
