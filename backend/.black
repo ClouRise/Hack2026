@@ -1,0 +1,4 @@
+[tool.black]  # type: ignore
+line-length = 120  # type: ignore
+target-version = ['py313']   # type: ignore
+extend-exclude = '''(.venv,alembic,docker,.git,__pycache__,config.py,base,session.py,env.py,.env,)'''  # type: ignore

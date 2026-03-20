@@ -1,4 +1,3 @@
-from plistlib import UID
 import uuid
 import enum
 
@@ -7,8 +6,7 @@ from datetime import datetime
 from typing import Optional
 from sqlalchemy.orm import mapped_column, Mapped
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Enum, String
-
+from sqlalchemy import Enum, String, Text, DateTime, Boolean
 
 
 
@@ -57,7 +55,31 @@ class User(Base):
         nullable=False
     )
 
-    photo_url: Mapped[str] = mapped_column(
+    photo_url: Mapped[Optional[str]] = mapped_column(
         String(255),
         nullable=True
+    )
+
+    bio: Mapped[Optional[str]] = mapped_column(
+        Text,
+        nullable=True
+    )
+
+    access_until: Mapped[Optional[datetime]] = mapped_column(
+        DateTime,
+        nullable=True,
+        index=True
+    )
+
+    is_blocked: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+        index=True
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow
     )
