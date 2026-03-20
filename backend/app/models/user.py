@@ -1,15 +1,87 @@
+from plistlib import UID
+from tokenize import Triple
 import uuid
-
-from sqlalchemy import Column, String
-from sqlalchemy.dialects.postgresql import UUID
+import enum
 
 from app.db.base import Base
+from datetime import datetime
+from typing import Optional
+from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Enum, String, Text, DateTime, Boolean
+
+
+
+class UserRole(str, enum.Enum):
+    """РОЛИ ПОЛЬЗОВАТЕЛЯ"""
+    ADMIN = "ADMIN"
+    PSYCHOLOGY = "PSYCHOLOGY"
 
 
 class User(Base):
+    """
+    ПОЛЬЗОВАТЕЛИ СИСТЕМЫ
+    """
     __tablename__ = "users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4
+    )
 
-    email = Column(String, unique=True, index=True)
-    username = Column(String, unique=True, index=True)
+    role: Mapped[UserRole] = mapped_column(
+        Enum(UserRole),
+        nullable=False
+    )
+
+    email: Mapped[str] = mapped_column(
+        String(255),
+        unique=True,
+        nullable=False,
+        index=True
+    )
+
+    hashed_password: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False
+    )
+
+    name: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False
+    )
+
+    phone: Mapped[str] = mapped_column(
+        String(12),
+        nullable=False
+    )
+
+    photo_url: Mapped[Optional[str]] = mapped_column(
+        String(255),
+        nullable=True
+    )
+
+    bio: Mapped[Optional[str]] = mapped_column(
+        Text,
+        nullable=True
+    )
+
+    access_until: Mapped[Optional[datetime]] = mapped_column(
+        DateTime,
+        nullable=True,
+        index=True
+    )
+
+    is_blocked: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+        index=True
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow
+    )
