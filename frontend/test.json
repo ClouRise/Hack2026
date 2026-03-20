@@ -1,0 +1,12 @@
+{
+    "data": [
+        {
+            "label": "ваш возраст: ",
+            "type": "number_select"
+        },
+                {
+            "label": "Ваш любимый цвет",
+            "type": "color_select"
+        }
+    ]
+}

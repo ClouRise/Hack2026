@@ -1,1 +1,138 @@
 @import "tailwindcss";
+
+/* =========== шрифты ============ */
+/* =========== шрифты ============ */
+
+@font-face {
+  font-family: 'BlenderPro';
+  src: url('../fonts/BlenderPro-Thin.woff2') format('woff2');
+  font-weight: 100;
+}
+
+@font-face {
+  font-family: 'BlenderPro';
+  src: url('../fonts/BlenderPro-Medium.woff2') format('woff2');
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: 'BlenderPro';
+  src: url('../fonts/BlenderPro-Bold.woff2') format('woff2');
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: 'GothamOffice-bold';
+  src: url('../fonts/gotham_bold.otf');
+}
+
+@font-face {
+  font-family: 'GothamOffice-medium';
+  src: url('../fonts/gotham_medium.otf');
+}
+
+@font-face {
+  font-family: 'GothamOffice-book';
+  src: url('../fonts/gotham_book.otf');
+}
+
+.BP-T {
+  font-family: 'BlenderPro', sans-serif;
+  font-weight: 100;
+}
+
+.BP-M {
+  font-family: 'BlenderPro', sans-serif;
+  font-weight: 500;
+}
+
+.BP-B {
+  font-family: 'BlenderPro', sans-serif;
+  font-weight: 700;
+}
+
+.G-Bold {
+  font-family: 'GothamOffice-bold';
+}
+
+.G-M {
+  font-family: 'GothamOffice-medium';
+}
+
+.G-Book {
+  font-family: 'GothamOffice-book';
+}
+
+/* =========== цвета ============ */
+/* =========== цвета ============ */
+
+.bg-green-light { background-color: #8ED993; }
+.text-green-light { color: #8ED993; }
+.hover\:text-green-light:hover { color: #8ED993; }
+
+.bg-green-dark { background-color: #144210; }
+.text-green-dark { color: #144210; }
+.hover\:text-green-dark:hover { color: #144210; }
+
+.bg-gray-main { background-color: #555E56; }
+.text-gray-main { color: #555E56; }
+.hover\:text-gray-main:hover { color: #555E56; }
+
+.bg-gray-medium { background-color: #7C897D; }
+.text-gray-medium { color: #7C897D; }
+.hover\:text-gray-medium:hover { color: #7C897D; }
+
+.bg-gray-light { background-color: #9BB299; }
+.text-gray-light { color: #9BB299; }
+.hover\:text-gray-light:hover { color: #9BB299; }
+
+.bg-teal-dark { background-color: #263D47; }
+.text-teal-dark { color: #263D47; }
+.hover\:text-teal-dark:hover { color: #263D47; }
+
+.bg-green-bright { background-color: #57CE5F; }
+.text-green-bright { color: #57CE5F; }
+.hover\:text-green-bright:hover { color: #57CE5F; }
+.hover\:bg-green-bright:hover { background-color: #5ddc65; }
+
+.bg-bg-light { background-color: #F1FAF0; }
+.text-bg-light { color: #F1FAF0; }
+.hover\:text-bg-light:hover { color: #F1FAF0; }
+
+.bg-bg-red { background-color: #421010; }
+.text-bg-red { color: #421010; }
+.hover\.border-bg-red:hover { border-color: #421010; }
+
+
+.border-green-light { border-color: #8ED993; }
+.border-green-dark { border-color: #144210; }
+.border-gray-main { border-color: #555E56; }
+.border-gray-medium { border-color: #7C897D; }
+.border-gray-light { border-color: #9BB299; }
+.border-teal-dark { border-color: #263D47; }
+.border-green-bright { border-color: #57CE5F; }
+.border-bg-light { border-color: #F1FAF0; }
+.border-bg-red { border-color: #421010; }
+
+.hover\:border-green-light:hover { border-color: #8ED993; }
+.hover\:border-green-dark:hover { border-color: #144210; }
+.hover\:border-gray-main:hover { border-color: #555E56; }
+.hover\:border-gray-medium:hover { border-color: #7C897D; }
+.hover\:border-gray-light:hover { border-color: #9BB299; }
+.hover\:border-teal-dark:hover { border-color: #263D47; }
+.hover\:border-green-bright:hover { border-color: #57CE5F; }
+.hover\:border-bg-light:hover { border-color: #F1FAF0; }
+.hover\:border-bg-red:hover { border-color: #421010; }
+
+/* =========== прочее ============ */
+/* =========== прочее ============ */
+
+.bg-test-page{
+    background-image: url(../images/elements.svg);
+    width: 100vw;
+    height: 100vh;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position-x: center;
+}
+

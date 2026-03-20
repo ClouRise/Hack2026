@@ -1,12 +1,17 @@
 <template>
   <div class="min-h-screen bg-gray-50">
     <nav class="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
-      <span class="font-bold text-xl">ПрофДНК</span>
       <div class="flex items-center gap-4">
-        <NuxtLink to="/psychologist" class="text-gray-600 hover:text-gray-900">Мои тесты</NuxtLink>
-        <NuxtLink to="/psychologist/profile" class="text-gray-600 hover:text-gray-900">Профиль</NuxtLink>
-        <button @click="authStore.logout()" class="text-red-500 hover:text-red-700">Выйти</button>
+        <NuxtLink to="/psychologist" class="bg-green-500 px-4 py-1 text-white rounded hover:bg-green-600 text-xl BP-B">
+          Создать тест
+        </NuxtLink>
+        <NuxtLink to="/psychologist" class="text-gray-600 text-green-dark hover:text-gray-main ml-4 text-xl BP-B">
+          Мои опросники
+        </NuxtLink>
       </div>
+        <NuxtLink to="/psychologist" class="text-gray-600 text-bg-red hover:text-gray-main text-xl BP-B">
+          Выйти
+        </NuxtLink>
     </nav>
     <main class="container mx-auto px-6 py-8">
       <slot />
