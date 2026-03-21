@@ -25,15 +25,16 @@ class Settings(BaseSettings):
     COOKIE_SAMESITE: str = "lax"
 
     # Database
-    POSTGRES_USER: str = "hackathon_user"
+    POSTGRES_USER: str = "h26_user"
     POSTGRES_PASSWORD: str = "123123"
     POSTGRES_HOST: str = "localhost"  # имя сервиса из docker-compose
     POSTGRES_PORT: str = "5432"
-    POSTGRES_DB: str = "hackathon_db"
+    POSTGRES_DB: str = "h26_db"
 
     @property
     def ASYNC_DATABASE_URL(self) -> str:
         """Async URL для FastAPI и Alembic async"""
+        return "postgresql+asyncpg://h26_user:123123@localhost:5432/h26_db"
         return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
     model_config = SettingsConfigDict(
