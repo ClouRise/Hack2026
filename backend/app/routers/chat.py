@@ -1,4 +1,4 @@
-import requests
+
 from fastapi import APIRouter, HTTPException
 from ..models.chat import AnswersRequest, ChatResponse
 from ..services.gigachat import gigachat

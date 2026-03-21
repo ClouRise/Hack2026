@@ -10,6 +10,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from .test import Test
+    from .refresh_token import Token
 
 
 class UserRole(str, enum.Enum):
@@ -30,6 +31,7 @@ class User(Base):
 
     role: Mapped[UserRole] = mapped_column(
         Enum(UserRole, name="user_role"),
+        default=UserRole.PSYCHOLOGIST,
         nullable=False,
         index=True
     )
@@ -90,6 +92,12 @@ class User(Base):
     tests: Mapped[list["Test"]] = relationship(
         "Test",
         back_populates="psychologist",
+        cascade="all, delete-orphan"
+    )
+
+    refresh_tokens: Mapped[list["Token"]] = relationship(
+        "Token",
+        back_populates="user",
         cascade="all, delete-orphan"
     )
 
