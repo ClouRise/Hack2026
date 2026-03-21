@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from .user import User
     from .question import Question
     from .sessions import Session
+    from .formula import Formula
 
 
 class Test(Base):
@@ -87,13 +88,6 @@ class Test(Base):
         nullable=False
     )
 
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
-        nullable=False
-    )
-
     is_active: Mapped[bool] = mapped_column(
         Boolean,
         default=True,
@@ -108,6 +102,11 @@ class Test(Base):
         nullable=False,
         index=True,
         comment="Soft delete"
+    )
+
+    expire_time: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
     )
     
     # Связи
@@ -127,6 +126,11 @@ class Test(Base):
         back_populates="test",
         cascade="all, delete-orphan",
         order_by="Question.order_index"
+    )
+
+    formula: Mapped["Formula"] = relationship(
+        "Formula",
+        back_populates="test"
     )
 
 

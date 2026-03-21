@@ -8,6 +8,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from .test import Test
+    from .answers import Answer
     
 
 class Session(Base):
@@ -68,5 +69,10 @@ class Session(Base):
 
     test: Mapped["Test"] = relationship(
         "Test",
+        back_populates="sessions"
+    )
+
+    answers: Mapped[list["Answer"]] = relationship(
+        "Answer",
         back_populates="sessions"
     )

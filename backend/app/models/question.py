@@ -1,6 +1,6 @@
 import uuid
 from typing import Optional, TYPE_CHECKING
-from sqlalchemy import Text, Integer, Boolean, ForeignKey, Enum
+from sqlalchemy import Text, Integer, Boolean, ForeignKey, Enum, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from app.db.base import Base
@@ -8,7 +8,8 @@ import enum
 
 if TYPE_CHECKING:
     from .test import Test
-
+    from .answers import Answer
+    from .formula import Formula
 
 
 class QuestionType(str, enum.Enum):
@@ -23,6 +24,13 @@ class QuestionType(str, enum.Enum):
     DATE = "date"
     TIME = "time"
     RATING = "rating"
+
+question_metrics = Table(
+        "question_metrics",
+        Base.metadata,
+        Column("question_id", UUID(as_uuid=True), ForeignKey("questions.id",ondelete="CASCADE"),primary_key=True, index=True),
+        Column("formula_id", UUID(as_uuid=True), ForeignKey("formulas.id",ondelete="CASCADE"),primary_key=True, index=True)
+    )
 
 
 class Question(Base):
@@ -60,6 +68,12 @@ class Question(Base):
         comment="Порядковый номер"
     )
 
+    section_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("sections.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    
     is_required: Mapped[bool] = mapped_column(
         Boolean,
         default=True,
@@ -86,6 +100,22 @@ class Question(Base):
         "Test",
         back_populates="questions"
     )
+
+    answers: Mapped["Answer"] = relationship(
+        "Answer",
+        back_populates="question"
+    )
+
+    formulas: Mapped[list["Formula"]] = relationship(
+        "Formula",
+        secondary=question_metrics,
+        back_populates="questions",
+    )
+
+
+
+
+
 
     # Методы
     def __repr__(self) -> str:
