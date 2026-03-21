@@ -4,6 +4,7 @@ networks:
 services:
   db:
     image: postgres:17.4
+    container_name: db_hack_2026
     restart: unless-stopped
     shm_size: 256mb
     environment:
@@ -15,40 +16,85 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d hackathon_db"] #дописать имя БД
+      test: ["CMD-SHELL", "pg_isready -U hackathon_user -d hackathon_db"] #сначала юзер, потом название БД
       interval: 10s
       timeout: 30s
       retries: 5
 
     ports:
-      - 8080:5432
+      - 5432:5432 #поменять здесь host
 
     networks:
       - dev
 
-  # adminer:
-  #   image: adminer
-  #   restart: always
-  #   ports:
-  #     - 8080:8080
-  #   networks:
-  #     - dev
+  adminer:
+    image: adminer
+    container_name: adm_hack_2026
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - dev
 
-  # backend:
-  #   build: ./backend
-  #   restart: unless-stopped
-  #   environment:
-  #     - DATABASE_URL=postgresql+asyncpg://hackaton_user:123123@db:5432/hackathon_db
-  #   volumes:
-  #    - ./backend/app/media:/app/media
-  #    - ./backend:/app
-  #   ports:
-  #    - 8000:8000
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  #   networks:
-  #     - dev
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: back_hack_2026
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://hackathon_user:123123@db:5432/hackathon_db
+    volumes:
+     - ./backend/app/media:/app/media
+    #  - ./backend:/app  #лишнее
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"] #поменять здесь host
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+     - 8000:8000
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - dev
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: front_hack_2026
+    restart: unless-stopped
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html:ro
+      - ./frontend/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "3001:80"
+    depends_on:
+      db:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    networks:
+      - dev
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx_hack_2026
+    restart: unless-stopped
+    volumes:
+      - ./frontend/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./frontend/dist:/usr/share/nginx/html:ro
+      - ./backend/app/media:/app/media:ro
+      - ./frontend/nginx/logs:/var/log/nginx
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - dev
+    
 volumes:
   postgres_data:

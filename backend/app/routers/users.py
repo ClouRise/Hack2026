@@ -1,0 +1,37 @@
+from pathlib import Path
+import uuid
+from fastapi import UploadFile, HTTPException, status
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+MEDIA_ROOT = BASE_DIR / "media" / "products"
+MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
+MAX_IMAGE_SIZE = 2 * 1024 * 1024  # 2 097 152 байт
+
+async def save_image(file: UploadFile) -> str:
+    """
+    Сохраняет изображение и возвращает относительный URL.
+    """
+    
+    #проверка расширения файла
+    if file.content_type not in ALLOWED_IMAGE_TYPES:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Only JPG, PNG or WebP images are allowed")
+        
+	#читаем содержимое файла в content
+    content = await file.read()
+    
+    #проверка размера файла
+    if len(content) > MAX_IMAGE_SIZE:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Image is too large")
+        
+	#создаем новое название файла
+    extension = Path(file.filename or "").suffix.lower() or ".jpg"
+    file_name = f"{uuid.uuid4()}{extension}"
+    
+    #получаем абсолютный путь файла
+    file_path = MEDIA_ROOT / file_name
+    
+    #бинарная запись в новый созданный файл
+    file_path.write_bytes(content)
+    
+    return f"/media/products/{file_name}"
