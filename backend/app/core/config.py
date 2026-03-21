@@ -49,11 +49,11 @@ class Settings(BaseSettings):
 
     # Database
     DATABASE_URL: str | None = None
-    POSTGRES_USER: str = "h26_user"
+    POSTGRES_USER: str = "hackathon_user"
     POSTGRES_PASSWORD: str = "123123"
-    POSTGRES_HOST: str = "localhost"  # имя сервиса из docker-compose
+    POSTGRES_HOST: str = "144.31.241.98"  # имя сервиса из docker-compose
     POSTGRES_PORT: str = "5432"
-    POSTGRES_DB: str = "h26_db"
+    POSTGRES_DB: str = "hackathon_db"
 
     @property
     def ASYNC_DATABASE_URL(self) -> str:

@@ -8,6 +8,10 @@ RUN apt-get update && apt-get install -y \
     && update-ca-certificates --fresh \
     && rm -rf /var/lib/apt/lists/*
 
+# RUN pip install --upgrade pip && \
+#     pip install cython && \
+#     cythonize -i loop.pyx
+
 ENV PIP_DEFAULT_TIMEOUT=300 \
     PIP_RETRIES=10 \
     PIP_NO_CACHE_DIR=1 \
@@ -15,8 +19,10 @@ ENV PIP_DEFAULT_TIMEOUT=300 \
 
 COPY requirements.txt .
 
-RUN pip install --upgrade pip && \
+
+RUN pip install --upgrade pip && pip install requests && \
     pip install -r requirements.txt --timeout 300 --retries 10
+
 
 RUN useradd -m back_user
 USER back_user
