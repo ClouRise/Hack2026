@@ -1,114 +1,182 @@
+import secrets
+import hashlib
+import string
+import uuid
+
 import jwt
 
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta, timezone
-
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.models import User as UserModel
+from app.models.refresh_token import Token as RefreshToken
+from app.models.user import User as UserModel
 from app.core.config import settings
 from app.db.session import get_db
 
+# Контекст для хеширования паролей
 pwd_context = CryptContext(
     schemes=["argon2"],
     deprecated="auto"
 )
 
-SECRET_KEY=settings.JWT_SECRET_KEY
-ALGORITHM=settings.JWT_ALGORITHM
-
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-REFRESH_TOKEN_EXPIRE_DAYS = 7
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/token")
-
-#хэширует пароль
-def hash_password(password: str) -> str:  
-	return pwd_context.hash(password)
-
-#проверяет пароль
-def verify_password(password: str, hashed_password: str) -> bool:  
-	return pwd_context.verify(password, hashed_password)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 
-def create_access_token(data: dict):
-    """
-    Создаёт JWT
-    """
+# ==================== ГЕНЕРАЦИЯ ПАРОЛЯ ====================
+
+def generate_password(length: int = 12) -> str:
+    """Генерация случайного пароля"""
+    alphabet = string.ascii_letters + string.digits + string.punctuation
+    password = ''.join(secrets.choice(alphabet) for _ in range(length))
+    return password
+
+
+# ==================== ПАРОЛИ ====================
+
+def hash_password(password: str) -> str:
+    """Хеширование пароля"""
+    return pwd_context.hash(password)
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Проверка пароля"""
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+# ==================== ACCESS TOKEN ====================
+
+def create_access_token(data: dict) -> str:
+    """Создание JWT Access Token"""
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({
-        "exp": expire,
-        "token_type": "access",
-    })
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=settings.JWT_ACCESS_EXPIRE_MINUT)
+    to_encode.update({"exp": expire})
+    secret_key = settings.JWT_SECRET_KEY or settings.SECRET_KEY
+    return jwt.encode(to_encode, secret_key, algorithm=settings.JWT_ALGORITHM)
 
-def create_refresh_token(data: dict):
-    """
-    Создаёт refresh-токен
-    """
-    to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
-    to_encode.update({
-        "exp": expire,
-        "token_type": "refresh",
-    })
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
-    """
-    Проверяет JWT и возвращает пользователя из базы.
-    """
+# ==================== REFRESH TOKEN ====================
+
+async def create_refresh_token(
+    data: dict,
+    db: AsyncSession,
+    device_info: str | None = None,
+    ip_address: str | None = None
+) -> str:
+    """Создание Refresh Token"""
+    expire = timedelta(days=settings.JWT_REFRESH_DAYS)
+    token = secrets.token_urlsafe(32)
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
+    
+    refresh_token = RefreshToken(
+        user_id=data["user_id"],
+        hash_token=token_hash,
+        expires_at=datetime.now(timezone.utc) + expire
+    )
+
+    db.add(refresh_token)
+    await db.commit()
+    
+    return token
+
+
+async def verify_refresh_token(db: AsyncSession, token: str):
+    """Проверка Refresh Token"""
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
+    
+    result = await db.execute(
+        select(RefreshToken).where(RefreshToken.hash_token == token_hash)
+    )
+    refresh_token = result.scalar_one_or_none()
+    
+    if not refresh_token:
+        return None
+    
+    # Проверка истечения
+    if refresh_token.expires_at < datetime.now(timezone.utc):
+        await db.delete(refresh_token)
+        await db.commit()
+        return None
+    
+    # Получение пользователя
+    user = await db.get(UserModel, refresh_token.user_id)
+    
+    if not user or user.is_blocked:
+        return None
+    
+    return user
+
+
+# ==================== DEPENDENCIES ====================
+
+async def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db)
+) -> UserModel:
+    """Получение текущего пользователя из JWT"""
+    
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
+        detail="Не удалось валидировать учетные данные",
+        headers={"WWW-Authenticate": "Bearer"}
     )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str | None = payload.get("sub")
-        token_type: str | None = payload.get("token_type")
-        if email is None or token_type != "access":
-            raise credentials_exception
 
+    try:
+        secret_key = settings.JWT_SECRET_KEY or settings.SECRET_KEY
+        payload = jwt.decode(token, secret_key, algorithms=[settings.JWT_ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
     except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has expired",
-            headers={"WWW-Authenticate": "Bearer"},
+            detail="Токен истёк",
+            headers={"WWW-Authenticate": "Bearer"}
         )
-    except jwt.PyJWTError:
+    except jwt.InvalidTokenError:
         raise credentials_exception
-    result = await db.scalars(
-        select(UserModel).where(UserModel.email == email))
-    user = result.first()
+    
+    # Получение пользователя
+    result = await db.execute(
+        select(UserModel).where(
+            UserModel.email == email,
+            UserModel.is_blocked == False
+        )
+    )
+    user = result.scalar_one_or_none()
+    
     if user is None:
         raise credentials_exception
-    return user
-
-async def get_user_from_token(token: str, db: AsyncSession) -> UserModel:
-    credentials_exception = HTTPException(status_code=401, detail="Invalid token")
-
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email = payload.get("sub")
-        token_type = payload.get("token_type")
-
-        if email is None or token_type != "access":
-            raise credentials_exception
-
-    except jwt.PyJWTError:
-        raise credentials_exception
-
-    result = await db.scalars(
-        select(UserModel).where(UserModel.email == email)
-    )
-    user = result.first()
-
-    if not user:
-        raise credentials_exception
 
     return user
+
+
+async def get_current_admin(
+    current_user: UserModel = Depends(get_current_user)
+) -> UserModel:
+    """Проверка что текущий пользователь - админ"""
+    
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Доступ только для администраторов"
+        )
+    
+    return current_user
+
+
+async def get_current_psychologist(
+    current_user: UserModel = Depends(get_current_user)
+) -> UserModel:
+    """Проверка что текущий пользователь - психолог"""
+    
+    if not current_user.is_psychologist:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Доступ только для психологов"
+        )
+    
+    return current_user

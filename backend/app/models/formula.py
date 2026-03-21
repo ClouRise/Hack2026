@@ -64,7 +64,7 @@ class Formula(Base):
         back_populates="formula"
     )
 
-    questions_id: Mapped[list["Question"]] = relationship(
+    questions: Mapped[list["Question"]] = relationship(
         "Question",
         secondary=question_metrics,
         back_populates="formulas",

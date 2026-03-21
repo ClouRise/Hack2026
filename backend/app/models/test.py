@@ -121,9 +121,10 @@ class Test(Base):
         back_populates="test"
     )
 
-    section: Mapped["Section"] = relationship(
+    sections: Mapped[list["Section"]] = relationship(
         "Section",
-        back_populates="test"
+        back_populates="test",
+        cascade="all, delete-orphan",
     )
 
 

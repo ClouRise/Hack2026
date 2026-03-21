@@ -38,5 +38,5 @@ class Section(Base):
 
     test: Mapped["Test"] = relationship(
         "Test",
-        back_populates="section"
+        back_populates="sections"
     )

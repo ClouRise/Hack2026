@@ -74,5 +74,5 @@ class Session(Base):
 
     answers: Mapped[list["Answer"]] = relationship(
         "Answer",
-        back_populates="sessions"
+        back_populates="session"
     )
