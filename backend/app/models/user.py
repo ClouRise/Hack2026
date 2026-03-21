@@ -1,16 +1,8 @@
 import uuid
 import enum
-<<<<<<< HEAD
-
-from ..db.base import Base
-from datetime import datetime
-from typing import Optional
-from sqlalchemy.orm import mapped_column, Mapped
-=======
 from datetime import datetime, timezone
 from typing import Optional, TYPE_CHECKING
 from sqlalchemy.orm import mapped_column, Mapped, relationship
->>>>>>> e056c3c17565fad9e39274ce53ffb50018ebc420
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import Enum, String, Text, DateTime, Boolean
 
