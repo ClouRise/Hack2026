@@ -5,6 +5,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from app.db.base import Base
 
+if TYPE_CHECKING:
+    from .test import Test
+
 class Section(Base):
     __tablename__= "sections"
 
@@ -23,4 +26,17 @@ class Section(Base):
     title: Mapped[str] = mapped_column(
         String(255),
         nullable=False
+    )
+
+    test_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("tests.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+
+
+    test: Mapped["Test"] = relationship(
+        "Test",
+        back_populates="test"
     )

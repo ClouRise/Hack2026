@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from .question import Question
     from .sessions import Session
     from .formula import Formula
+    from .sections import Section
 
 
 class Test(Base):
@@ -130,6 +131,11 @@ class Test(Base):
 
     formula: Mapped["Formula"] = relationship(
         "Formula",
+        back_populates="test"
+    )
+
+    section: Mapped["Section"] = relationship(
+        "Seqtion",
         back_populates="test"
     )
 
