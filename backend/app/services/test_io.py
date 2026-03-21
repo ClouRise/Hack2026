@@ -242,8 +242,8 @@ async def export_test(db: AsyncSession, test_id: uuid.UUID) -> dict:
         select(Test)
         .where(Test.id == test_id, Test.is_deleted == False)
         .options(
-            selectinload(Test.section).selectinload(Section.questions),
-            selectinload(Test.formula).selectinload(Formula.questions_id),
+            selectinload(Test.sections).selectinload(Section.questions),
+            selectinload(Test.formula).selectinload(Formula.questions),
         )
     )
     test: Optional[Test] = result.scalar_one_or_none()
@@ -251,7 +251,7 @@ async def export_test(db: AsyncSession, test_id: uuid.UUID) -> dict:
         raise ValueError(f"Тест {test_id} не найден")
 
     sections_out = []
-    for section in sorted(test.section, key=lambda s: cast(Section, s).order):
+    for section in sorted(test.sections, key=lambda s: cast(Section, s).order):
         questions_out = []
         for q in sorted(section.questions, key=lambda q: q.order_index):
             questions_out.append({
@@ -277,7 +277,7 @@ async def export_test(db: AsyncSession, test_id: uuid.UUID) -> dict:
             "id":              str(f.id),
             "name":            f.name,
             "operation":       f.expression,
-            "question_ids":    [str(q.id) for q in f.questions_id],
+            "question_ids":    [str(q.id) for q in f.questions],
             "coefficient":     f.coefficient,
             "interpretations": f.ranges,
         }
@@ -312,7 +312,7 @@ async def get_test_for_guest(db: AsyncSession, access_link: str) -> dict:
             Test.is_deleted  == False,
         )
         .options(
-            selectinload(Test.section).selectinload(Section.questions)
+            selectinload(Test.sections).selectinload(Section.questions)
         )
     )
     test: Optional[Test] = result.scalar_one_or_none()
@@ -320,7 +320,7 @@ async def get_test_for_guest(db: AsyncSession, access_link: str) -> dict:
         raise ValueError("Тест не найден или недоступен")
 
     sections_out = []
-    for section in sorted(test.section, key=lambda s: cast(Section, s).order):
+    for section in sorted(test.sections, key=lambda s: cast(Section, s).order):
         questions_out = []
         for q in sorted(section.questions, key=lambda q: q.order_index):
             if q.is_hidden:

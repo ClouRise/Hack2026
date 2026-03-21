@@ -2,10 +2,13 @@
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from app.db.session import get_db
-from app.auth import get_current_user  # берём у коллеги
+from app.auth import get_current_psychologist
 from app.models.user import User
+from app.models.test import Test
+from app.models.sessions import Session
 from app.services.test_io import import_test, export_test, get_test_for_guest, save_session_answers
 
 router = APIRouter()
@@ -14,23 +17,13 @@ router = APIRouter()
 # ══════════════════════════════════════════════
 # ТЕСТЫ — для психолога
 # ══════════════════════════════════════════════
-from app.models.user import UserRole
-async def get_current_user():
-    return User(
-        id=uuid.UUID("00000000-0000-0000-0000-000000000001"),
-        role=UserRole.PSYCHOLOGIST,
-        email="test@test.com",
-        hashed_password="",
-        name="Test Psychologist",
-    )
 
 @router.post("/tests/import", status_code=status.HTTP_201_CREATED)
 async def route_import_test(
     data: dict,
     db:   AsyncSession = Depends(get_db),
-    user: User         = Depends(get_current_user),
+    user: User         = Depends(get_current_psychologist),
 ):
-    """Импорт теста из JSON — создаёт новую копию теста в БД."""
     try:
         test = await import_test(db, data, psychologist_id=user.id)
     except KeyError as e:
@@ -45,9 +38,8 @@ async def route_import_test(
 async def route_export_test(
     test_id: uuid.UUID,
     db:      AsyncSession = Depends(get_db),
-    user:    User         = Depends(get_current_user),
+    user:    User         = Depends(get_current_psychologist),
 ):
-    """Экспорт теста в JSON."""
     try:
         data = await export_test(db, test_id)
     except ValueError as e:
@@ -64,7 +56,6 @@ async def route_get_test_for_guest(
     access_link: str,
     db:          AsyncSession = Depends(get_db),
 ):
-    """Получить тест по ссылке — без весов и служебных полей."""
     try:
         data = await get_test_for_guest(db, access_link)
     except ValueError as e:
@@ -78,15 +69,6 @@ async def route_start_session(
     guest_data:  dict,
     db:          AsyncSession = Depends(get_db),
 ):
-    """
-    Создаёт сессию для гостя перед началом прохождения.
-    guest_data: {"client_name": "Миша", "client_extra": {...}}
-    Возвращает session_id который фронт использует при отправке ответов.
-    """
-    from sqlalchemy import select
-    from models.test import Test
-    from models.sessions import Session
-
     result = await db.execute(
         select(Test).where(
             Test.access_link == access_link,
@@ -117,7 +99,6 @@ async def route_save_answers(
     data:       dict,
     db:         AsyncSession = Depends(get_db),
 ):
-    """Сохранить ответы гостя."""
     try:
         await save_session_answers(db, session_id, data)
     except ValueError as e:

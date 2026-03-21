@@ -116,9 +116,10 @@ class Test(Base):
         order_by="Question.order_index"
     )
 
-    formula: Mapped["Formula"] = relationship(
+    formula: Mapped[list["Formula"]] = relationship(
         "Formula",
-        back_populates="test"
+        back_populates="test",
+        cascade="all, delete-orphan",
     )
 
     sections: Mapped[list["Section"]] = relationship(

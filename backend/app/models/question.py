@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from .test import Test
     from .answers import Answer
     from .formula import Formula
-
+    from .sections import Section
 
 class QuestionType(str, enum.Enum):
     """Типы вопросов"""
@@ -109,7 +109,12 @@ class Question(Base):
     formulas: Mapped[list["Formula"]] = relationship(
         "Formula",
         secondary=question_metrics,
-        back_populates="questions_id",
+        back_populates="questions",
+    )
+
+    section: Mapped["Section"] = relationship(
+        "Section",
+        back_populates="questions",
     )
 
 

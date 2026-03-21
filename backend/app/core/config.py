@@ -60,7 +60,6 @@ class Settings(BaseSettings):
         """Async URL для FastAPI и Alembic async"""
         if self.DATABASE_URL:
             return self.DATABASE_URL
-
         return (
             f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
             f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"

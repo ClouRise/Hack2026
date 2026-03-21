@@ -7,6 +7,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from .test import Test
+    from .question import Question
 
 class Section(Base):
     __tablename__= "sections"
@@ -39,4 +40,10 @@ class Section(Base):
     test: Mapped["Test"] = relationship(
         "Test",
         back_populates="sections"
+    )
+
+    questions: Mapped[list["Question"]] = relationship(
+        "Question",
+        back_populates="section",
+        order_by="Question.order_index",
     )
