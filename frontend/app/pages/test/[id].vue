@@ -1,146 +1,137 @@
 <template>
-  <div class="text-xs text-green-light">Тест:</div>
-  <div class="text-4xl BP-B text-green-dark leading-[0.9] mt-0">{{ testTitle }}</div>
-
-  <div class="flex justify-center my-4">
-    <div class="w-80 h-px bg-gray-300"></div>
-  </div>
-
-  <div v-if="!isCanTouchContinue">
-
-    <div class="text-[10pt] leading-[1.1] text-gray-medium G-M mb-6">
-      Перед началом выполнения теста, вы должны заполнить информацию о себе.
-    </div>
-
-    <div class="space-y-4">
-      <div>
-        <label class="block text-[10pt] text-gray-light G-M mb-1">Ваше ФИО</label>
-        <input @input="checkMainLabels" v-model="form.fio" type="text"
-          class="w-full px-3 py-2 text-green-dark bg-bg-light border-l-[5px] border-b-[2px] border-gray-light focus:outline-none focus:border-green-bright G-M" />
-      </div>
-
-      <div>
-        <label class="block text-[10pt] text-gray-light G-M  mb-1">Ваша почта</label>
-        <input @input="checkMainLabels" v-model="form.email" type="email"
-          class="w-full px-3 py-2 text-green-dark bg-bg-light border-l-[5px] border-b-[2px] border-gray-light focus:outline-none focus:border-green-bright G-M" />
-      </div>
-    </div>
-
-    <div v-if="dynamicFields === null" class="space-y-4 mt-4">
-      <div v-for="(field, index) in dynamicFields" :key="index">
-        <label class="block text-[10pt] text-gray-light G-M  mb-1">{{ field.label }}</label>
-        <select v-if="field.type === 'number_select'" v-model="dynamicForm[field.label]"
-          class="w-full px-3 py-2 text-green-dark bg-bg-light border-l-[5px] border-b-[2px] border-gray-light focus:outline-none focus:border-green-bright G-M">
-          <option v-for="n in 100" :key="n" :value="n">{{ n }}</option>
-        </select>
-
-        <input v-else-if="field.type === 'color_select'" type="color" v-model="dynamicForm[field.label]" class="" />
-      </div>
-    </div>
-
-    <Button @click="checkForm"
-      class="bg-green-bright hover:bg-green-bright mt-8 w-full px-4 py-2 text-white rounded hover:bg-green-600 text-xl BP-B">
-      {{ button_text }}
-    </Button>
-
-    <p v-if="!isCanTouchContinue && firstTouchButton" class="text-center text-rose-400 relative top-[10px] text-sm">{{
-      error_message }}</p>
-  </div>
-
-  <div v-if="isTest">
-    <div v-for="(currentSection, index_section) in testData.sections" :key="currentSection.id">
-      <div class="my-3">
-
-        <div :class="index_section == 0 ? 'mt-0 mb-3 text-right' : 'mt-12 mb-3 text-right'">
-          <label class="text-[17pt] BP-B text-green-dark leading-[0.9] mt-0">{{ currentSection.title }}.</label>
+  <div>
+    <Teleport to="body">
+      <div v-if="isTest" class="fixed top-0 left-0 right-0 z-50 flex flex-col items-center">
+        <div class="w-full h-[3px] bg-gray-200">
+          <div class="h-[3px] bg-green-bright transition-all duration-500" :style="{ width: progress + '%' }"></div>
         </div>
+        <div class="bg-white px-5 py-1 rounded-b-2xl flex items-center gap-2" style="box-shadow: 0 4px 16px rgba(20,66,16,0.10);">
+          <span class="text-xs G-M text-gray-medium">Пройдено</span>
+          <span class="text-sm BP-B text-green-dark">{{ progress }}%</span>
+        </div>
+      </div>
+    </Teleport>
 
-        <div v-for="(question, index_question) in currentSection.questions.filter(q => visibleQuestions.has(q.id))"
-          :key="question.id">
+    <div class="text-xs text-green-light">Тест:</div>
+    <div class="text-4xl BP-B text-green-dark leading-[0.9] mt-0">{{ testTitle }}</div>
 
-          <label class="G-M text-gray-medium text-[13pt] leading-[1.1] block">
-            <span class="G-Bold text-gray-main mr-1 leading-[1.1] inline-block">
-              № {{ index_section + 1 }}.{{ index_question + 1 }}.
-            </span>
-            {{ question.text }} <span class="text-rose-300">{{ question.required ? '*' : '' }}</span>
-          </label>
+    <div class="flex justify-center my-4">
+      <div class="w-80 h-px bg-gray-300"></div>
+    </div>
 
-          <p class="G-Book text-[10pt] text-gray-medium opacity-[0.5]" v-if="question.type == 'single_choice'">Выберите
-            <span class="underline">один</span> вариант ответа.
-          </p>
-          <p class="G-Book text-[10pt] text-gray-medium opacity-[0.5]" v-if="question.type == 'multiple_choice'">
-            Выберите <span class="underline">несколько</span> вариантов
-            ответа.</p>
-          <p class="G-Book text-[10pt] text-gray-medium opacity-[0.5]" v-if="question.type == 'raiting'"><span
-              class="underline">Перетяните</span> ползунок, где {{
-                question.min }} - не про меня; {{ question.max }} - это я!.</p>
-          <p class="G-Book text-[10pt] text-gray-medium opacity-[0.5]" v-if="question.type == 'text'">
-            Введите текст.</p>
-          <p class="G-Book text-[10pt] text-gray-medium opacity-[0.5]" v-if="question.type == 'textarea'"><span
-              class="underline">Развернуто</span> ответьте на вопрос.</p>
-          <p class="G-Book text-[10pt] text-gray-medium opacity-[0.5]" v-if="question.type == 'number'">Введите число.
-          </p>
-          <p class="G-Book text-[10pt] text-gray-medium opacity-[0.5]" v-if="question.type == 'slider'">Выберите
-            диапазон ползунками.</p>
-          <p class="G-Book text-[10pt] text-gray-medium opacity-[0.5]" v-if="question.type == 'yes_no'">Выбериите
-            вариант ответа.</p>
-          <p class="G-Book text-[10pt] text-gray-medium opacity-[0.5]" v-if="question.type == 'date'">
-            Выберите дату.</p>
+    <div v-if="!isCanTouchContinue">
+      <div class="text-[10pt] leading-[1.1] text-gray-medium G-M mb-6">
+        Перед началом выполнения теста, вы должны заполнить информацию о себе.
+      </div>
 
-          <p class="G-Bold text-gray-main text-[11pt] mb-2">Ответ: {{ question.type == "rating" ? form[question.id] : ''
-            }}</p>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-[10pt] text-gray-light G-M mb-1">Ваше ФИО</label>
+          <input @input="checkMainLabels" v-model="form.fio" type="text"
+            class="w-full px-3 py-2 text-green-dark bg-bg-light border-l-[5px] border-b-[2px] border-gray-light focus:outline-none focus:border-green-bright G-M" />
+        </div>
+        <div>
+          <label class="block text-[10pt] text-gray-light G-M mb-1">Ваша почта</label>
+          <input @input="checkMainLabels" v-model="form.email" type="email"
+            class="w-full px-3 py-2 text-green-dark bg-bg-light border-l-[5px] border-b-[2px] border-gray-light focus:outline-none focus:border-green-bright G-M" />
+        </div>
+      </div>
 
-          <QuestionInput v-model="form[question.id]" :type="question.type"
-            :options="question.options.map(opt => opt.text)" :min="question.min" :max="question.max" />
+      <div v-if="dynamicFields?.length" class="space-y-4 mt-4">
+        <div v-for="(field, index) in dynamicFields" :key="index">
+          <label class="block text-[10pt] text-gray-light G-M mb-1">{{ field.label }}</label>
+          <input v-if="field.type === 'email'" type="email" v-model="form[field.label]"
+            class="w-full px-3 py-2 text-green-dark bg-bg-light border-l-[5px] border-b-[2px] border-gray-light focus:outline-none focus:border-green-bright G-M" />
+          <input v-else-if="field.type === 'number'" type="number" v-model="form[field.label]"
+            class="w-full px-3 py-2 text-green-dark bg-bg-light border-l-[5px] border-b-[2px] border-gray-light focus:outline-none focus:border-green-bright G-M" />
+          <input v-else-if="field.type === 'color'" type="color" v-model="form[field.label]" />
+          <input v-else type="text" v-model="form[field.label]"
+            class="w-full px-3 py-2 text-green-dark bg-bg-light border-l-[5px] border-b-[2px] border-gray-light focus:outline-none focus:border-green-bright G-M" />
+        </div>
+      </div>
 
-          <div v-if="question.type === 'rating'" class="flex justify-between text-[10pt] text-gray-medium G-M mt-1">
-            <span>{{ question.min }}</span>
-            <span>{{ question.max }}</span>
+      <Button @click="checkForm"
+        class="bg-green-bright hover:bg-green-bright mt-8 w-full px-4 py-2 text-white rounded hover:bg-green-600 text-xl BP-B">
+        {{ button_text }}
+      </Button>
+
+      <p v-if="!isCanTouchContinue && firstTouchButton" class="text-center text-rose-400 relative top-[10px] text-sm">
+        {{ error_message }}
+      </p>
+    </div>
+
+    <div v-if="isTest">
+      <div v-for="(currentSection, index_section) in testData.sections" :key="currentSection.id">
+        <div class="my-3">
+          <div :class="index_section == 0 ? 'mt-0 mb-3 text-right' : 'mt-12 mb-3 text-right'">
+            <label class="text-[17pt] BP-B text-green-dark leading-[0.9] mt-0">{{ currentSection.title }}.</label>
           </div>
 
-          <div v-if="currentSection.questions.length != index_question + 1" class="flex justify-center my-5">
-            <div class="w-full h-px bg-gray-200"></div>
+          <div v-for="(question, index_question) in currentSection.questions.filter(q => visibleQuestions.has(q.id))"
+            :key="question.id">
+            <label class="G-M text-gray-medium text-[13pt] leading-[1.1] block">
+              <span class="G-Bold text-gray-main mr-1 leading-[1.1] inline-block">
+                № {{ index_section + 1 }}.{{ index_question + 1 }}.
+              </span>
+              {{ question.text }} <span class="text-rose-300">{{ question.required ? '*' : '' }}</span>
+            </label>
+
+            <p class="G-Book text-[10pt] text-gray-medium opacity-[0.5]" v-if="question.type == 'single_choice'">Выберите <span class="underline">один</span> вариант ответа.</p>
+            <p class="G-Book text-[10pt] text-gray-medium opacity-[0.5]" v-if="question.type == 'multiple_choice'">Выберите <span class="underline">несколько</span> вариантов ответа.</p>
+            <p class="G-Book text-[10pt] text-gray-medium opacity-[0.5]" v-if="question.type == 'raiting'"><span class="underline">Перетяните</span> ползунок, где {{ question.min }} - не про меня; {{ question.max }} - это я!.</p>
+            <p class="G-Book text-[10pt] text-gray-medium opacity-[0.5]" v-if="question.type == 'text'">Введите текст.</p>
+            <p class="G-Book text-[10pt] text-gray-medium opacity-[0.5]" v-if="question.type == 'textarea'"><span class="underline">Развернуто</span> ответьте на вопрос.</p>
+            <p class="G-Book text-[10pt] text-gray-medium opacity-[0.5]" v-if="question.type == 'number'">Введите число.</p>
+            <p class="G-Book text-[10pt] text-gray-medium opacity-[0.5]" v-if="question.type == 'slider'">Выберите диапазон ползунками.</p>
+            <p class="G-Book text-[10pt] text-gray-medium opacity-[0.5]" v-if="question.type == 'yes_no'">Выберите вариант ответа.</p>
+            <p class="G-Book text-[10pt] text-gray-medium opacity-[0.5]" v-if="question.type == 'date'">Выберите дату.</p>
+
+            <p class="G-Bold text-gray-main text-[11pt] mb-2">Ответ: {{ question.type == "rating" ? form[question.id] : '' }}</p>
+
+            <QuestionInput v-model="form[question.id]" :type="question.type"
+              :options="question.options.map(opt => opt.text)" :min="question.min" :max="question.max" />
+
+            <div v-if="question.type === 'rating'" class="flex justify-between text-[10pt] text-gray-medium G-M mt-1">
+              <span>{{ question.min }}</span>
+              <span>{{ question.max }}</span>
+            </div>
+
+            <div v-if="currentSection.questions.length != index_question + 1" class="flex justify-center my-5">
+              <div class="w-full h-px bg-gray-200"></div>
+            </div>
           </div>
-
         </div>
-
       </div>
+
+      <Button @click="checkFormTest"
+        class="bg-green-bright hover:bg-green-bright mt-8 w-full px-4 py-2 text-white rounded hover:bg-green-600 text-xl BP-B">
+        {{ button_text }}
+      </Button>
+      <p v-if="!isCanTouchContinueTest && firstTouchButtonEndTest"
+        class="text-center text-rose-400 relative top-[10px] text-sm">Пожалуйста, ответьте на все вопросы со значком "*"
+      </p>
     </div>
-    <Button @click="checkFormTest"
-      class="bg-green-bright hover:bg-green-bright mt-8 w-full px-4 py-2 text-white rounded hover:bg-green-600 text-xl BP-B">
-      {{ button_text }}
-    </Button>
-    <p v-if="!isCanTouchContinueTest && firstTouchButtonEndTest"
-      class="text-center text-rose-400 relative top-[10px] text-sm">Пожалуйста, ответьте на все вопросы со значком "*"
-    </p>
+
+    <div v-if="downloadReport" class="flex flex-col items-center">
+      <div class="image-done-test"></div>
+      <h1 class="text-4xl BP-B text-green-dark2 leading-[0.9] mb-6">Тест пройден!</h1>
+      <p class="G-M text-gray-medium leading-[1.1] text-sm text-left mb-4">
+        Спасибо за прохождение теста! Психолог в скором времени пришлет результаты вам на почту.
+        А пока можете ознакомиться с <span class="underline G-Bold">предварительным</span> результатом от ИИ:
+      </p>
+      <div class="w-full bg-bg-light border-l-[5px] border-green-dark2 p-4 mb-6">
+        <p class="BP-M text-sm text-gray-800 leading-[0.9]">
+          На основе ваших ответов не было выявлено выраженных индикаторов, характерных для острых клинических состояний, требующих немедленного вмешательства. Показатели находятся в диапазоне, который часто связывают с нормативными колебаниями психоэмоционального фона (адаптационная усталость, ситуативный стресс.<br/><br/>
+          <span class="font-bold">Важно помнить:</span> Данный тест не является медицинским диагнозом. Он отражает ваше состояние только в момент прохождения.<br/><br/>
+          <span class="font-bold">Рекомендация:</span> Для поддержания эмоционального баланса мы рекомендуем обратить внимание на режим сна и физической активности. Если вы замечаете, что усталость накапливается, консультация психолога (даже профилактическая) поможет подобрать инструменты для восстановления.
+        </p>
+      </div>
+      <button @click="downloadReportTest"
+        class="bg-green-bright hover:bg-green-bright mt-8 w-full px-4 py-2 text-white rounded hover:bg-green-600 text-xl BP-B">
+        Скачать результат
+      </button>
+    </div>
   </div>
-
-<div v-if="downloadReport" class="flex flex-col items-center">
-  <div class="image-done-test"></div>
-  <h1 class="text-4xl BP-B text-green-dark2 leading-[0.9] mb-6">Тест пройден!</h1>
-  
-  <p class="G-M text-gray-medium leading-[1.1] text-sm text-left mb-4">
-    Спасибо за прохождение теста! Психолог в скором времени пришлет результаты вам на почту. 
-    А пока можете ознакомиться с <span class="underline G-Bold">предварительным</span> результатом от ИИ:
-  </p>
-  
-  <!-- Блок с результатом ИИ -->
-  <div class="w-full bg-bg-light border-l-[5px] border-green-dark2 p-4 mb-6">
-    <p class="BP-M text-sm text-gray-800 leading-[0.9]">
-      На основе ваших ответов не было выявлено выраженных индикаторов, характерных для острых клинических состояний, требующих немедленного вмешательства. Показатели находятся в диапазоне, который часто связывают с нормативными колебаниями психоэмоционального фона (адаптационная усталость, ситуативный стресс.<br/><br/>
-      <span class="font-bold">Важно помнить:</span> Данный тест не является медицинским диагнозом. Он отражает ваше состояние только в момент прохождения.<br/><br/>
-      <span class="font-bold">Рекомендация:</span> Для поддержания эмоционального баланса мы рекомендуем обратить внимание на режим сна и физической активности. Если вы замечаете, что усталость накапливается, консультация психолога (даже профилактическая) поможет подобрать инструменты для восстановления.
-    </p>
-  </div>
-  
-  <!-- Кнопка -->
-  <button @click="downloadReportTest"
-    class="bg-green-bright hover:bg-green-bright mt-8 w-full px-4 py-2 text-white rounded hover:bg-green-600 text-xl BP-B">
-    Скачать результат
-  </button>
-</div>
-
-
 </template>
 
 <script setup lang="ts">
@@ -559,9 +550,25 @@ const recomputeVisibility = () => {
       continue
     }
 
-    // SINGLE / YES_NO
-    if (q.type === 'single_choice' || q.type === 'yes_no') {
+    // SINGLE
+    if (q.type === 'single_choice') {
       const opt = q.options.find(o => o.text === answer)
+
+      if (opt?.next_question_id) {
+        const jumpIndex = questions.findIndex(x => x.id === opt.next_question_id)
+
+        if (jumpIndex !== -1) {
+          visible.add(opt.next_question_id)
+          i = jumpIndex
+          continue
+        }
+      }
+    }
+
+    // YES_NO
+    if (q.type === 'yes_no') {
+      const mappedAnswer = answer === 'yes' ? 'Да' : 'Нет'
+      const opt = q.options.find(o => o.text === mappedAnswer)
 
       if (opt?.next_question_id) {
         const jumpIndex = questions.findIndex(x => x.id === opt.next_question_id)
@@ -612,6 +619,12 @@ watch(
 
 const initForm = () => {
   const answers: Record<string, any> = {}
+  answers['fio'] = ''
+  answers['email'] = ''
+
+  testData.value.client_fields.forEach(field => {
+    answers[field.label] = ''
+  })
 
   testData.value.sections.forEach(section => {
     section.questions.forEach(question => {
@@ -639,7 +652,12 @@ initForm()
 
 const checkForm = () => {
   firstTouchButton.value = true
-  if (form.value.fio.trim() && form.value.email.trim()) {
+  
+  const requiredDynamic = testData.value.client_fields
+    .filter(f => f.required)
+    .every(f => form.value[f.label]?.toString().trim())
+
+  if (form.value.fio?.trim() && form.value.email?.trim() && requiredDynamic) {
     button_text.value = 'Закончить тест'
     isCanTouchContinue.value = true
     isTest.value = true
@@ -703,21 +721,30 @@ const checkFormTest = () => {
     return
   }
 
-  button_text.value = 'Скачать результат'
   isCanTouchContinueTest.value = true
   isTest.value = false
-  const finalAnswers = getFinalAnswers()
-
-  console.log('FINAL RESULT:', finalAnswers)
-
   downloadReport.value = true
 
-  if (downloadReport.value) {
-    console.log(getFinalAnswers());
+  // Собираем только видимые вопросы с текстами
+  const finalAnswers: Record<string, any> = {}
+  
+  visibleQuestions.value.forEach(id => {
+    const question = flatQuestions.value.find(q => q.id === id)
+    if (!question) return
+    
+    finalAnswers[question.text] = form.value[id]
+  })
 
-  }
-
-
+  console.log('=== ОТВЕТЫ КЛИЕНТА ===')
+  console.log('ФИО:', form.value.fio)
+  console.log('Email:', form.value.email)
+  testData.value.client_fields.forEach(f => {
+    console.log(`${f.label}:`, form.value[f.label])
+  })
+  console.log('--- Ответы на вопросы ---')
+  Object.entries(finalAnswers).forEach(([question, answer]) => {
+    console.log(`${question}:`, answer)
+  })
 }
 
 
@@ -746,19 +773,45 @@ const checkMainLabels = () => {
 
 
 const dynamicForm = ref<Record<string, any>>({})
-const result: Record<string, any> = ref({})
+const result: Record<string, any> = {}
 const getFinalAnswers = () => {
+  const answers: { question_id: string; answer: any }[] = []
 
   visibleQuestions.value.forEach(id => {
-    result[id] = form.value[id]
+    answers.push({
+      question_id: id,
+      answer: form.value[id]
+    })
   })
 
-  return result
+  const guest_info: { field_label: string; value: any }[] = [
+    { field_label: 'ФИО', value: form.value.fio },
+    { field_label: 'Email', value: form.value.email },
+    ...testData.value.client_fields.map(f => ({
+      field_label: f.label,
+      value: form.value[f.label]
+    }))
+  ]
+
+  return { answers, guest_info }
 }
 
 // const dynamicFields = ref([
 //   { label: "Ваш возраст: ", type: "number_select" },
 //   { label: "Ваш любимый цвет", type: "color_select" }
 // ])
-const dynamicFields = null
+const dynamicFields = testData.value.client_fields
+
+const progress = computed(() => {
+  const total = visibleQuestions.value.size
+  if (total === 0) return 0
+  const answered = [...visibleQuestions.value].filter(id => {
+    const val = form.value[id]
+    if (Array.isArray(val)) return val.length > 0
+    return val !== null && val !== undefined && val !== ''
+  }).length
+  return Math.round((answered / total) * 100)
+})
+
+
 </script>
