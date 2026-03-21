@@ -4,19 +4,19 @@
       <h1 class="text-3xl BP-B text-green-dark">Новый тест</h1>
       <div class="flex gap-3">
         <button @click="builderRef?.fileInput?.click()"
-          class="px-4 py-2 border-2 border-gray-light G-M text-gray-medium rounded hover:border-green-dark hover:text-green-dark transition">
+          class="px-4 py-2 border-2 border-gray-light G-M text-gray-medium rounded hover:border-green-dark hover:text-green-dark">
           Импорт JSON
         </button>
         <button @click="handleExport"
-          class="px-4 py-2 border-2 border-gray-light G-M text-gray-medium rounded hover:border-green-dark hover:text-green-dark transition">
+          class="px-4 py-2 border-2 border-gray-light G-M text-gray-medium rounded hover:border-green-dark hover:text-green-dark">
           Экспорт JSON
         </button>
         <button @click="handleSave('draft')"
-          class="px-4 py-2 border-2 border-green-dark G-M text-green-dark rounded hover:bg-green-dark hover:text-bg-light transition">
+          class="px-4 py-2 border-2 border-gray-light G-M text-gray-medium rounded hover:border-green-dark hover:text-green-dark">
           Сохранить черновик
         </button>
         <button @click="handleSave('published')"
-          class="px-6 py-2 bg-green-bright text-white BP-B rounded hover:bg-green-dark transition">
+          class="px-6 text-lg py-2 bg-green-bright hover:bg-green-bright text-white BP-B rounded">
           Опубликовать
         </button>
       </div>

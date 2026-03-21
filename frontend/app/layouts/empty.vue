@@ -25,12 +25,6 @@
   background-size: cover;
 }
 
-.card-test-shadows {
-  box-shadow: 
-    22px 22px 30px 0px rgba(7, 98, 104, 0.8),
-    -22px -22px 30px 0px rgba(29, 208, 103, 0.3);
-}
-
 .overflow-y-auto {
   overflow-y: auto;
   height: 100%;

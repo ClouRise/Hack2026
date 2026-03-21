@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white rounded-2xl p-6 mb-4" style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
+  <div class="bg-white rounded-2xl p-6 mb-4 card-test-shadows">
     <h2 class="text-xl BP-B text-green-dark mb-6">Конструктор отчётов</h2>
 
     <div class="grid grid-cols-2 gap-6">

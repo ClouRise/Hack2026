@@ -2,7 +2,7 @@
   <div class="max-w-2xl mx-auto">
     <h1 class="text-3xl BP-B text-green-dark mb-6">Личный кабинет</h1>
 
-    <div class="bg-white rounded-2xl p-6 mb-4" style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
+    <div class="bg-white rounded-2xl p-6 mb-4 card-test-shadows" >
       <!-- Фото -->
       <div class="flex items-center gap-6 mb-6">
         <div class="relative">
@@ -12,7 +12,7 @@
           />
           <button
             @click="fileInput?.click()"
-            class="absolute bottom-0 right-0 bg-green-bright text-white rounded-full w-7 h-7 flex items-center justify-center text-sm hover:bg-green-dark transition"
+            class="absolute bottom-0 right-0 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm bg-green-bright hover:bg-green-bright transition"
           >
             ✎
           </button>
@@ -51,13 +51,13 @@
       <div class="flex items-center justify-between">
         <button
           @click="showBusinessCard = true"
-          class="px-4 py-2 border-2 border-green-dark text-green-dark G-M rounded hover:bg-green-dark hover:text-bg-light transition"
+          class="px-4 py-2 text-teal-dark G-M rounded hover:bg-green-dark hover:text-gray-medium"
         >
           Показать визитку
         </button>
         <button
           @click="handleSave"
-          class="px-6 py-2 bg-green-bright text-white BP-B rounded hover:bg-green-dark transition"
+          class="px-6 py-1 bg-green-bright text-lg rounded text-white BP-B hover:bg-green-bright"
         >
           Сохранить
         </button>
