@@ -28,7 +28,7 @@ const authStore = useAuthStore()
 </script>
 
 <style lang="css" scoped>
-.bg-dashboard-page {
+/* .bg-dashboard-page {
   position: fixed;
   top: 0;
   left: 0;
@@ -39,5 +39,5 @@ const authStore = useAuthStore()
   background-image: url('../assets/images/elements.svg');
   background-attachment: fixed;
   background-size: cover;
-}
+} */
 </style>

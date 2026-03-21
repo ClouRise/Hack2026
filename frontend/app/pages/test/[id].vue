@@ -16,7 +16,7 @@
     <div class="text-4xl BP-B text-green-dark leading-[0.9] mt-0">{{ testTitle }}</div>
 
     <div class="flex justify-center my-4">
-      <div class="w-80 h-px bg-gray-300"></div>
+      <div :style="isDarkTheme ? 'opacity: 0.1' : ''" class="w-80 h-px bg-gray-light"></div>
     </div>
 
     <div v-if="!isCanTouchContinue">
@@ -97,7 +97,7 @@
             </div>
 
             <div v-if="currentSection.questions.length != index_question + 1" class="flex justify-center my-5">
-              <div class="w-full h-px bg-gray-200"></div>
+              <div :style="isDarkTheme ? 'opacity: 0.1' : ''" class="w-full h-px bg-gray-200"></div>
             </div>
           </div>
         </div>
@@ -120,7 +120,7 @@
         А пока можете ознакомиться с <span class="underline G-Bold">предварительным</span> результатом от ИИ:
       </p>
       <div class="w-full bg-bg-light border-l-[5px] border-green-dark2 p-4 mb-6">
-        <p class="BP-M text-sm text-gray-800 leading-[0.9]">
+        <p class="BP-M text-sm text-gray-main leading-[0.9]">
           На основе ваших ответов не было выявлено выраженных индикаторов, характерных для острых клинических состояний, требующих немедленного вмешательства. Показатели находятся в диапазоне, который часто связывают с нормативными колебаниями психоэмоционального фона (адаптационная усталость, ситуативный стресс.<br/><br/>
           <span class="font-bold">Важно помнить:</span> Данный тест не является медицинским диагнозом. Он отражает ваше состояние только в момент прохождения.<br/><br/>
           <span class="font-bold">Рекомендация:</span> Для поддержания эмоционального баланса мы рекомендуем обратить внимание на режим сна и физической активности. Если вы замечаете, что усталость накапливается, консультация психолога (даже профилактическая) поможет подобрать инструменты для восстановления.
@@ -138,10 +138,15 @@
 definePageMeta({
   layout: 'empty'
 })
+
 const route = useRoute()
 const testId = route.params.id
 
 import { ref } from 'vue'
+import { useThemeStore } from '~/stores/theme'
+import { storeToRefs } from 'pinia'
+const themeStore = useThemeStore()
+const { currentTheme, isLightTheme, isDarkTheme } = storeToRefs(themeStore)
 
 const testData = ref({
   "title": "тест миши",

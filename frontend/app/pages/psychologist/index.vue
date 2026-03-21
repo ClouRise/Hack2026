@@ -2,7 +2,7 @@
   <div class="max-w-2xl mx-auto">
     <h1 class="text-3xl BP-B text-green-dark mb-6">Личный кабинет</h1>
 
-    <div class="bg-white rounded-2xl p-6 mb-4 card-test-shadows" >
+    <div class="bg-white rounded-lg p-6 mb-4 card-test-shadows" >
       <!-- Фото -->
       <div class="flex items-center gap-6 mb-6">
         <div class="relative">
@@ -51,13 +51,13 @@
       <div class="flex items-center justify-between">
         <button
           @click="showBusinessCard = true"
-          class="px-4 py-2 text-teal-dark G-M rounded hover:bg-green-dark hover:text-gray-medium"
+          class="px-4 py-2 text-teal-dark cursor-pointer G-M rounded hover:bg-green-dark hover:text-gray-medium"
         >
           Показать визитку
         </button>
         <button
           @click="handleSave"
-          class="px-6 py-1 bg-green-bright text-lg rounded text-white BP-B hover:bg-green-bright"
+          class="px-6 py-1 bg-green-bright cursor-pointer text-lg rounded text-white BP-B hover:bg-green-bright"
         >
           Сохранить
         </button>
@@ -67,7 +67,7 @@
 
   <!-- Модалка визитки -->
   <div v-if="showBusinessCard" class="fixed inset-0 bg-green-dark/70 flex items-center justify-center z-50" @click.self="showBusinessCard = false">
-    <div class="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 text-center" style="box-shadow: 0 4px 32px rgba(20,66,16,0.15);">
+    <div class="bg-white rounded-lg p-8 max-w-sm w-full mx-4 text-center card-test-shadows">
       <img
         :src="avatar || '/default-avatar.png'"
         class="w-20 h-20 rounded-full object-cover mx-auto mb-4 border-2 border-green-light"

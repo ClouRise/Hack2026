@@ -13,7 +13,7 @@
 </template>
 
 <style lang="css" scoped>
-.bg-test-page {
+/* .bg-test-page {
   position: fixed;
   top: 0;
   left: 0;
@@ -23,7 +23,7 @@
   background-image: url('../assets/images/elements.svg');
   background-attachment: fixed;
   background-size: cover;
-}
+} */
 
 .overflow-y-auto {
   overflow-y: auto;

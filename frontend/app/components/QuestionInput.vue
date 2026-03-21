@@ -46,7 +46,7 @@
             <label v-for="opt in options" :key="opt" class="flex items-center gap-2">
                 <input type="checkbox" class="checkbox-custom" :value="opt" :checked="value?.includes(opt)"
                     @change="toggleCheckbox(opt)" />
-                <span>{{ opt }}</span>
+                <span class="G-M text-gray-main text-[12pt]">{{ opt }}</span>
             </label>
         </div>
 
