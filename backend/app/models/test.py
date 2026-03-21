@@ -69,26 +69,6 @@ class Test(Base):
         comment="Дополнительные обязательные поля для клиента"
     )
 
-    total_completions: Mapped[int] = mapped_column(
-        Integer,
-        default=0,
-        nullable=False,
-        comment="Количество завершённых прохождений"
-    )
-
-    last_completed_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True,
-        index=True,
-        comment="Дата последнего прохождения"
-    )
-
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        nullable=False
-    )
-
     is_active: Mapped[bool] = mapped_column(
         Boolean,
         default=True,
@@ -110,6 +90,13 @@ class Test(Base):
         nullable=True,
     )
     
+    report_template: Mapped[Optional[dict]] = mapped_column(
+        JSONB,
+        nullable=True,
+        default=lambda: {"client": [], "psychologist": []},
+        comment="Шаблон отчёта"
+    )
+
     # Связи
     psychologist: Mapped["User"] = relationship(
         "User",
@@ -135,7 +122,7 @@ class Test(Base):
     )
 
     section: Mapped["Section"] = relationship(
-        "Seqtion",
+        "Section",
         back_populates="test"
     )
 
