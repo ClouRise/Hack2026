@@ -1,35 +1,31 @@
 <template>
   <div>
     <p class="text-sm G-M text-gray-medium mb-4">
-      Доступ до: <span class="text-green-dark BP-M">{{ authStore.user?.access_until ?? 'не ограничен' }}</span>
+      Доступ до: <span class="text-green-dark text-lg BP-M">{{ authStore.user?.access_until ?? 'не ограничен' }}</span>
     </p>
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-3xl BP-B text-green-dark">Мои опросники</h1>
       <div class="flex items-center gap-3">
-        <button
-          @click="fileInput?.click()"
-          class="px-4 py-2 border-2 border-gray-light text-gray-medium G-M rounded hover:border-green-dark hover:text-green-dark transition"
-        >
+        <button @click="fileInput?.click()"
+          class="px-4 py-2 border-2 border-gray-light text-gray-medium G-M rounded hover:border-green-dark hover:text-green-dark transition">
           Импорт JSON
         </button>
-        <NuxtLink
-          to="/psychologist/tests/create"
-          class="px-6 py-2 bg-green-bright text-white BP-B rounded hover:bg-green-dark transition"
-        >
+        <NuxtLink to="/psychologist/tests/create"
+          class="px-6 py-2 bg-green-bright text-white BP-B rounded hover:bg-green-dark transition">
           + Создать тест
         </NuxtLink>
       </div>
     </div>
 
-    <div class="bg-white rounded-2xl overflow-hidden" style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
+    <div class="bg-white rounded-lg overflow-hidden card-test-shadows">
       <table class="w-full">
         <thead class="bg-bg-light border-b border-gray-light">
           <tr>
-            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">Название</th>
-            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">Заполнили</th>
-            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">Последнее заполнение</th>
-            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">Статус</th>
-            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">Действия</th>
+            <th class="text-left px-6 py-3 leading-[1.1] w-32 text-lg G-M text-gray-medium">Название</th>
+            <th class="text-left px-6 py-3 leading-[1.1] w-24 text-sm G-M text-gray-medium">Прошли</th>
+            <th class="text-left px-6 py-3 leading-[1.1] w-32 text-sm G-M text-gray-medium">Последнее заполнение</th>
+            <th class="text-left px-6 py-3 leading-[1.1] text-sm G-M text-gray-medium">Статус</th>
+            <th class="text-left px-6 py-3 leading-[1.1] text-sm G-M text-gray-medium">Действия</th>
           </tr>
         </thead>
         <tbody>
@@ -38,41 +34,46 @@
               Тестов пока нет. Создайте первый!
             </td>
           </tr>
-          <tr
-            v-for="test in tests"
-            :key="test.id"
-            class="border-b border-bg-light hover:bg-bg-light transition"
-          >
+          <tr v-for="test in tests" :key="test.id" class="border-b border-bg-light hover:bg-bg-light transition">
             <td class="px-6 py-4">
-              <p class="BP-M text-green-dark">{{ test.title }}</p>
+              <p class="BP-B leading-[1.1] text-green-dark">{{ test.title }}</p>
             </td>
             <td class="px-6 py-4 G-M text-gray-medium">{{ test.submissions_count }}</td>
-            <td class="px-6 py-4 G-M text-gray-medium">{{ test.last_submission_at ? formatDate(test.last_submission_at) : '—' }}</td>
+            <td class="px-6 py-4 G-M text-gray-medium">{{ test.last_submission_at ? formatDate(test.last_submission_at)
+              : '—' }}</td>
             <td class="px-6 py-4">
               <span
-                :class="test.status === 'published' ? 'bg-green-light text-green-dark' : 'bg-bg-light text-gray-medium'"
-                class="px-3 py-1 rounded-full text-xs G-M"
-              >
+                :class="test.status === 'published' ? 'bg-bg-light border-l-[5px] border-green-bright text-green-dark2' : 'bg-bg-light border-l-[5px] border-gray-light text-gray-medium'"
+                class="px-3 py-2 text-xs G-M">
                 {{ test.status === 'published' ? 'Опубликован' : 'Черновик' }}
               </span>
             </td>
             <td class="px-6 py-4">
-              <div class="flex items-center gap-3 flex-wrap">
-                <button @click="copyLink(test)" class="text-sm G-M text-green-bright hover:text-green-dark transition">
-                  Скопировать ссылку
-                </button>
-                <NuxtLink :to="`/psychologist/tests/${test.id}/submissions`" class="text-sm G-M text-gray-medium hover:text-green-dark transition">
-                  Результаты
-                </NuxtLink>
-                <NuxtLink :to="`/psychologist/tests/${test.id}/edit`" class="text-sm G-M text-gray-medium hover:text-green-dark transition">
-                  Редактировать
-                </NuxtLink>
-                <button @click="exportTest(test)" class="text-sm G-M text-gray-medium hover:text-green-dark transition">
-                  Экспорт
-                </button>
-                <button @click="deleteTest(test.id)" class="text-sm G-M text-bg-red hover:text-red-900 transition">
-                  Удалить
-                </button>
+              <div class="flex items-center justify-between gap-4">
+                <!-- Левая часть - текстовые ссылки -->
+                <div class="flex items-center gap-3">
+                  <button @click="copyLink(test)"
+                    class="text-sm G-M text-green-bright hover:text-green-dark transition whitespace-nowrap">
+                    Скопировать ссылку
+                  </button>
+                  <NuxtLink :to="`/psychologist/tests/${test.id}/submissions`"
+                    class="text-sm G-M text-gray-medium hover:text-green-dark transition whitespace-nowrap">
+                    Результаты
+                  </NuxtLink>
+                </div>
+
+                <!-- Правая часть - иконки -->
+                <div class="flex items-center gap-2">
+                  <NuxtLink :to="`/psychologist/tests/${test.id}/edit`"
+                    class="edit-icon bg-gray-light rounded w-8 h-8 flex items-center justify-center hover:bg-gray-200 transition">
+                  </NuxtLink>
+                  <button @click="exportTest(test)"
+                    class="export-icon bg-gray-light rounded w-8 h-8 flex items-center justify-center hover:bg-gray-200 transition cursor-pointer">
+                  </button>
+                  <button @click="deleteTest(test.id)"
+                    class="trash-icon bg-red-400 hover:bg-red-500 rounded w-8 h-8 flex items-center justify-center transition cursor-pointer">
+                  </button>
+                </div>
               </div>
             </td>
           </tr>
