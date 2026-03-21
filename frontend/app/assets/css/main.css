@@ -557,7 +557,7 @@ input[type="checkbox"]:checked::after {
     backdrop-filter: blur(2px);
 }
 
-.edit-icon{
+.edit-icon {
     background-image: url(../images/edit.svg);
     width: 30px;
     height: 30px;
@@ -566,7 +566,11 @@ input[type="checkbox"]:checked::after {
     background-size: 80%;
 }
 
-.trash-icon{
+.edit-icon:hover {
+    background-color: #62a871 !important; /* цвет hover для edit */
+}
+
+.trash-icon {
     background-image: url(../images/trash.svg);
     width: 30px;
     height: 30px;
@@ -575,11 +579,19 @@ input[type="checkbox"]:checked::after {
     background-size: 80%;
 }
 
-.export-icon{
+.trash-icon:hover {
+    background-color: #ef4444 !important; /* красный при наведении */
+}
+
+.export-icon {
     background-image: url(../images/export.svg);
     width: 30px;
     height: 30px;
     background-repeat: no-repeat;
     background-position: center;
     background-size: 80%;
+}
+
+.export-icon:hover {
+    background-color: #62a871 !important; /* цвет hover для export */
 }

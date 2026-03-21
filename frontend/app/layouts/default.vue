@@ -5,14 +5,14 @@
         <NuxtLink to="/psychologist/tests/create" class="px-4 py-1 text-white rounded bg-green-bright hover:bg-green-bright text-xl BP-B">
           Создать тест
         </NuxtLink>
-        <NuxtLink to="/psychologist/tests" class="text-gray-600 text-green-dark hover:text-gray-main ml-4 text-xl BP-B">
+        <NuxtLink to="/psychologist/tests" class=" text-green-dark hover:text-gray-medium ml-4 text-xl BP-B">
           Мои опросники
         </NuxtLink>
-        <NuxtLink to="/psychologist" class="text-gray-600 text-green-dark hover:text-gray-main ml-4 text-xl BP-B">
+        <NuxtLink to="/psychologist" class=" text-green-dark hover:text-gray-medium ml-4 text-xl BP-B">
           Профиль
         </NuxtLink>
       </div>
-        <NuxtLink to="/psychologist" class="text-gray-600 text-bg-red hover:text-gray-main text-xl BP-B">
+        <NuxtLink to="/psychologist" class="text-red-800 hover:text-red-600 text-xl BP-B">
           Выйти
         </NuxtLink>
     </nav>
