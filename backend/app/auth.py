@@ -4,11 +4,11 @@ import string
 import uuid
 
 import jwt
-
+from typing import Optional
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta, timezone
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status,Request, Cookie
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -23,7 +23,7 @@ pwd_context = CryptContext(
     deprecated="auto"
 )
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/token")
 
 
 # ==================== ГЕНЕРАЦИЯ ПАРОЛЯ ====================
@@ -82,6 +82,25 @@ async def create_refresh_token(
     
     return token
 
+async def get_token_from_cookie_or_header(
+    request: Request,
+    access_token: Optional[str] = Cookie(None, alias="access_token"),
+) -> Optional[str]:
+    """
+    Достает токен из cookie или заголовка Authorization.
+    Приоритет: cookie > header
+    """
+    # 1. Пробуем взять из cookie
+    if access_token:
+        return access_token
+    
+    # 2. Пробуем взять из заголовка Authorization
+    auth_header = request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        return auth_header.split(" ")[1]
+    
+    return None
+
 
 async def verify_refresh_token(db: AsyncSession, token: str):
     """Проверка Refresh Token"""
@@ -113,17 +132,21 @@ async def verify_refresh_token(db: AsyncSession, token: str):
 # ==================== DEPENDENCIES ====================
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: AsyncSession = Depends(get_db)
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    token: Optional[str] = Depends(get_token_from_cookie_or_header),
 ) -> UserModel:
-    """Получение текущего пользователя из JWT"""
+    """Получение текущего пользователя из JWT (cookie или header)"""
     
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Не удалось валидировать учетные данные",
         headers={"WWW-Authenticate": "Bearer"}
     )
-
+    
+    if token is None:
+        raise credentials_exception
+    
     try:
         secret_key = settings.JWT_SECRET_KEY or settings.SECRET_KEY
         payload = jwt.decode(token, secret_key, algorithms=[settings.JWT_ALGORITHM])
@@ -139,7 +162,6 @@ async def get_current_user(
     except jwt.InvalidTokenError:
         raise credentials_exception
     
-    # Получение пользователя
     result = await db.execute(
         select(UserModel).where(
             UserModel.email == email,
@@ -150,7 +172,7 @@ async def get_current_user(
     
     if user is None:
         raise credentials_exception
-
+    
     return user
 
 

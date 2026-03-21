@@ -3,7 +3,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-
+from fastapi.security import OAuth2PasswordRequestForm
 from app.auth import (
     hash_password,
     generate_password,
@@ -11,8 +11,10 @@ from app.auth import (
     get_current_admin,
     verify_password,
     create_access_token,
-    create_refresh_token
+    create_refresh_token,
+    verify_refresh_token,
 )
+
 from app.schemas.users import (
     UpdateExistUser,
     UserSchema,
@@ -129,60 +131,116 @@ async def create_user(
         temp_password=temp_password
     )
 
-@router.post("/login")
+@router.post("/token")
 async def login(
     response: Response,
-    request: Request,
+    form_data: OAuth2PasswordRequestForm = Depends(),
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Вход в систему
-    
-    Возвращает access_token в теле ответа
-    Refresh token сохраняется в httpOnly cookie
+    Аутентифицирует пользователя и возвращает JWT токены.
+    Refresh-токен сохраняется в httpOnly cookie.
     """
-
-    username, password = await _get_login_credentials(request)
-    
-    # Найти пользователя по email
     result = await db.execute(
-        select(UserModel).where(UserModel.email == username)
+        select(UserModel).where(UserModel.email == form_data.username)
     )
     user = result.scalar_one_or_none()
     
-    # Проверить пароль
-    if not user or not verify_password(password, user.hashed_password):
+    if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Неверный email или пароль",
-            headers={"WWW-Authenticate": "Bearer"}
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
         )
     
-    # Проверить блокировку
     if user.is_blocked:
-        raise HTTPException(403, "Доступ заблокирован")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is blocked"
+        )
     
-    # Создать Access Token
-    access_token = create_access_token({"sub": user.email})
+    access_token = create_access_token(data={"sub": user.email, "id": str(user.id)})
     
-    # Создать Refresh Token
     refresh_token = await create_refresh_token(
         data={"user_id": user.id},
-        db=db
+        db=db,
     )
     
-    # Установить Refresh Token в cookie
+    # Сохраняем refresh-токен в cookie
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
         httponly=settings.COOKIE_HTTPONLY,
         secure=settings.COOKIE_SECURE,
-        samesite=settings.COOKIE_SAMESITE,
+        samesite="lax",
         max_age=settings.JWT_REFRESH_DAYS * 24 * 60 * 60,
+        path="/",
+    )
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=settings.COOKIE_HTTPONLY,
+        secure=settings.COOKIE_SECURE,
+        samesite="lax",
+        max_age=settings.JWT_ACCESS_EXPIRE_MINUT * 60,  # 30 минут
+        path="/",
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
+
+
+@router.post("/refresh")
+async def refresh_token_endpoint(
+    response: Response,
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Обновляет пару токенов.
+    Берёт старый refresh-токен из cookie, возвращает новый в cookie.
+    """
+    refresh_token = request.cookies.get("refresh_token")
+    
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token not found in cookies",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    user = await verify_refresh_token(db, refresh_token)
+    
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired refresh token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    new_access_token = create_access_token(
+        data={"sub": user.email, "id": str(user.id)}
+    )
+    
+    new_refresh_token = await create_refresh_token(
+        data={"user_id": user.id},
+        db=db,
+    )
+    
+    response.set_cookie(
+        key="refresh_token",
+        value=new_refresh_token,
+        httponly=settings.COOKIE_HTTPONLY,
+        secure=settings.COOKIE_SECURE,
+        samesite="lax",
+        max_age=settings.JWT_REFRESH_DAYS * 24 * 60 * 60,
+        path="/",
     )
     
     return {
-        "access_token": access_token,
+        "access_token": new_access_token,
         "token_type": "bearer"
     }
 

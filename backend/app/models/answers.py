@@ -52,7 +52,7 @@ class Answer(Base):
         comment="Время ответа"
     )
 
-    session: Mapped["Session"] = relationship(
+    sessions: Mapped["Session"] = relationship(
         "Session",
         back_populates="answers"
     )

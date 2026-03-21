@@ -4,12 +4,11 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from app.core.config import settings
 
-# Создаем async engine
+
 engine = create_async_engine(
     settings.ASYNC_DATABASE_URL,
-    echo=settings.DEBUG,  # Логи SQL запросов в дев-режиме
-    future=True,
-    pool_pre_ping=True,  # Проверка соединения перед использованием
+    echo=True,
+    pool_pre_ping=True,
 )
 
 # Создаем фабрику сессий
