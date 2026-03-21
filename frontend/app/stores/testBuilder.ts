@@ -57,7 +57,8 @@ export interface TestMeta {
   title: string
   description: string
   show_report_to_client: boolean
-  client_fields: ClientField[]         // доп. поля которые клиент заполняет перед тестом
+  client_fields: ClientField[],
+  report_template: ReportTemplate   
 }
 
 export interface MetricInterpretation {
@@ -69,11 +70,29 @@ export interface MetricInterpretation {
 export interface Metric {
   id: string
   name: string
-  operation: 'sum' | 'avg' | 'min' | 'max'
+  operation: 'sum' | 'avg' | 'min' | 'max' | 'percent'
   question_ids: string[]
   coefficient: number
   description: string
   interpretations: MetricInterpretation[]
+}
+
+export type ReportBlockType = 'text' | 'metric' | 'answers' | 'chart'
+
+export interface ReportBlock {
+  id: string
+  type: ReportBlockType
+  content?: string
+  metric_id?: string
+  chart_type?: 'bar' | 'radar' | 'pie'
+  metric_ids?: string[]
+  question_ids?: string[]  // добавляем — для блока ответов
+  show_all_answers?: boolean  // показать все или только выбранные
+}
+
+export interface ReportTemplate {
+  client: ReportBlock[]
+  psychologist: ReportBlock[]
 }
 
 export const useTestBuilderStore = defineStore('testBuilder', () => {
@@ -81,7 +100,11 @@ export const useTestBuilderStore = defineStore('testBuilder', () => {
     title: '',
     description: '',
     show_report_to_client: false,
-    client_fields: []
+    client_fields: [],
+    report_template: {
+      client: [],
+      psychologist: []
+    }
   })
 
   const sections = ref<Section[]>([])
@@ -210,7 +233,11 @@ export const useTestBuilderStore = defineStore('testBuilder', () => {
       title: '',
       description: '',
       show_report_to_client: false,
-      client_fields: []
+      client_fields: [],
+      report_template: {
+        client: [],
+        psychologist: []
+      }
     }
     sections.value = []
     metrics.value = []
@@ -221,7 +248,8 @@ export const useTestBuilderStore = defineStore('testBuilder', () => {
     title: data.title || '',
     description: data.description || '',
     show_report_to_client: data.show_report_to_client || false,
-    client_fields: data.client_fields || []
+    client_fields: data.client_fields || [],
+    report_template: data.report_template || { client: [], psychologist: [] }
   }
   sections.value = data.sections || []
   metrics.value = data.metrics || []

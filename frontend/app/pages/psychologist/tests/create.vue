@@ -1,23 +1,22 @@
 <template>
-    
   <div>
     <div class="flex items-center justify-between mb-6 max-w-4xl mx-auto">
-      <h1 class="text-2xl font-bold text-gray-800">Новый тест</h1>
+      <h1 class="text-3xl BP-B text-green-dark">Новый тест</h1>
       <div class="flex gap-3">
         <button @click="builderRef?.fileInput?.click()"
-          class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+          class="px-4 py-2 border-2 border-gray-light G-M text-gray-medium rounded hover:border-green-dark hover:text-green-dark transition">
           Импорт JSON
         </button>
         <button @click="handleExport"
-          class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+          class="px-4 py-2 border-2 border-gray-light G-M text-gray-medium rounded hover:border-green-dark hover:text-green-dark transition">
           Экспорт JSON
         </button>
         <button @click="handleSave('draft')"
-          class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+          class="px-4 py-2 border-2 border-green-dark G-M text-green-dark rounded hover:bg-green-dark hover:text-bg-light transition">
           Сохранить черновик
         </button>
         <button @click="handleSave('published')"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          class="px-6 py-2 bg-green-bright text-white BP-B rounded hover:bg-green-dark transition">
           Опубликовать
         </button>
       </div>

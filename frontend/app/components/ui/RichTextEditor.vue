@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col border border-gray-300 rounded-lg">
+  <div class="flex flex-col border-l-[5px] border-b-[2px] border-gray-light bg-bg-light">
     <QuillEditor
       v-model:content="content"
       content-type="html"
@@ -41,13 +41,18 @@ const options = {
 
 <style>
 .ql-toolbar {
+  border: none !important;
+  border-top: 1px solid #9BB299 !important;
   order: 2;
-  border-top: 1px solid #e5e7eb !important;
-  border-bottom: none !important;
+  background-color: #F1FAF0;
+  font-family: 'GothamOffice-medium', sans-serif;
 }
 .ql-container {
+  border: none !important;
   order: 1;
-  border-bottom: none !important;
+  background-color: #F1FAF0;
+  font-family: 'GothamOffice-medium', sans-serif;
+  color: #144210;
 }
 .ql-editor {
   min-height: 150px;

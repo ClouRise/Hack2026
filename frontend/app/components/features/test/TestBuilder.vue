@@ -1,71 +1,71 @@
 <template>
   <div class="max-w-4xl mx-auto">
     <!-- Мета-информация -->
-    <div class="bg-white rounded-2xl shadow-sm p-6 mb-4">
-      <h2 class="text-lg font-semibold mb-4">Основная информация</h2>
+    <div class="bg-white rounded-2xl p-6 mb-4" style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
+      <h2 class="text-xl BP-B text-green-dark mb-4">Основная информация</h2>
       <div class="flex flex-col gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Название теста</label>
+          <label class="block text-[10pt] G-M text-gray-light mb-1">Название теста</label>
           <input
             v-model="store.meta.title"
             type="text"
             placeholder="Введите название"
-            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright"
           />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Описание</label>
+          <label class="block text-[10pt] G-M text-gray-light mb-1">Описание</label>
           <textarea
             v-model="store.meta.description"
             placeholder="Введите описание"
             rows="3"
-            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright"
           />
         </div>
         <label class="flex items-center gap-2 cursor-pointer">
-          <input v-model="store.meta.show_report_to_client" type="checkbox" class="w-4 h-4" />
-          <span class="text-sm text-gray-700">Показывать отчёт клиенту после прохождения</span>
+          <input v-model="store.meta.show_report_to_client" type="checkbox" class="w-4 h-4 accent-green-500" />
+          <span class="text-sm G-M text-gray-medium">Показывать отчёт клиенту после прохождения</span>
         </label>
       </div>
     </div>
 
     <!-- Поля клиента -->
-    <div class="bg-white rounded-2xl shadow-sm p-6 mb-4">
-      <h2 class="text-lg font-semibold mb-4">Данные клиента перед тестом</h2>
-      <p class="text-sm text-gray-500 mb-4">ФИО — обязательное поле, всегда присутствует.</p>
-      <div class="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg mb-3">
-        <span class="text-sm text-gray-700">ФИО</span>
-        <span class="text-xs text-gray-400 ml-auto">Обязательное</span>
+    <div class="bg-white rounded-2xl p-6 mb-4" style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
+      <h2 class="text-xl BP-B text-green-dark mb-4">Данные клиента перед тестом</h2>
+      <p class="text-sm G-M text-gray-medium mb-4">ФИО — обязательное поле, всегда присутствует.</p>
+      <div class="flex items-center gap-2 px-3 py-2 bg-bg-light border-l-4 border-green-light rounded-r-lg mb-3">
+        <span class="text-sm G-M text-green-dark">ФИО</span>
+        <span class="text-xs G-M text-gray-medium ml-auto">Обязательное</span>
       </div>
       <div v-for="(field, index) in store.meta.client_fields" :key="index" class="flex items-center gap-2 mb-2">
         <input v-model="field.label" type="text" placeholder="Название поля"
-          class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          class="flex-1 px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright" />
         <select v-model="field.type"
-          class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          class="px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright">
           <option value="text">Текст</option>
           <option value="email">Email</option>
           <option value="number">Число</option>
           <option value="color">Цвет</option>
         </select>
-        <label class="flex items-center gap-1 text-sm text-gray-600 cursor-pointer">
-          <input v-model="field.required" type="checkbox" class="w-4 h-4" />
+        <label class="flex items-center gap-1 text-sm G-M text-gray-medium cursor-pointer">
+          <input v-model="field.required" type="checkbox" class="w-4 h-4 accent-green-500" />
           Обяз.
         </label>
-        <button @click="store.meta.client_fields.splice(index, 1)" class="text-red-400 hover:text-red-600">✕</button>
+        <button @click="store.meta.client_fields.splice(index, 1)" class="text-bg-red hover:text-red-900 transition">✕</button>
       </div>
       <button @click="store.meta.client_fields.push({ label: '', type: 'text', required: false })"
-        class="mt-2 text-sm text-blue-500 hover:text-blue-700">
+        class="mt-2 text-sm G-M text-green-bright hover:text-green-dark transition">
         + Добавить поле
       </button>
     </div>
 
     <!-- Секции -->
-    <div v-for="section in store.sections" :key="section.id" class="bg-white rounded-2xl shadow-sm p-6 mb-4">
+    <div v-for="section in store.sections" :key="section.id" class="bg-white rounded-2xl p-6 mb-4" style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
       <div class="flex items-center justify-between mb-4">
         <input v-model="section.title" type="text"
-          class="text-lg font-semibold border-none outline-none bg-transparent w-full"
+          class="text-xl BP-B text-green-dark border-none outline-none bg-transparent w-full"
           placeholder="Название раздела" />
-        <button @click="store.removeSection(section.id)" class="text-red-400 hover:text-red-600 ml-2">
+        <button @click="store.removeSection(section.id)" class="text-sm G-M text-bg-red hover:text-red-900 transition ml-2">
           Удалить раздел
         </button>
       </div>
@@ -78,27 +78,29 @@
         />
       </div>
       <button @click="store.addQuestion(section.id)"
-        class="mt-4 w-full border-2 border-dashed border-gray-300 rounded-lg py-3 text-gray-500 hover:border-blue-400 hover:text-blue-500 transition">
+        class="mt-4 w-full border-2 border-dashed border-green-light rounded-lg py-3 G-M text-gray-medium hover:border-green-bright hover:text-green-bright transition">
         + Добавить вопрос
       </button>
     </div>
 
     <button @click="store.addSection()"
-      class="w-full border-2 border-dashed border-gray-300 rounded-xl py-4 text-gray-500 hover:border-blue-400 hover:text-blue-500 transition mb-4">
+      class="w-full border-2 border-dashed border-green-light rounded-xl py-4 G-M text-gray-medium hover:border-green-bright hover:text-green-bright transition mb-4">
       + Добавить раздел
     </button>
 
     <!-- Метрики -->
-    <div class="bg-white rounded-2xl shadow-sm p-6 mb-4">
-      <h2 class="text-lg font-semibold mb-4">Формулы и метрики</h2>
+    <div class="bg-white rounded-2xl p-6 mb-4" style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
+      <h2 class="text-xl BP-B text-green-dark mb-4">Формулы и метрики</h2>
       <div class="flex flex-col gap-4">
         <MetricItem v-for="metric in store.metrics" :key="metric.id" :metric="metric" />
       </div>
       <button @click="store.addMetric()"
-        class="mt-4 w-full border-2 border-dashed border-gray-300 rounded-lg py-3 text-gray-500 hover:border-blue-400 hover:text-blue-500 transition">
+        class="mt-4 w-full border-2 border-dashed border-green-light rounded-lg py-3 G-M text-gray-medium hover:border-green-bright hover:text-green-bright transition">
         + Добавить метрику
       </button>
     </div>
+
+    <ReportBuilder />
 
     <input ref="fileInput" type="file" accept=".json" class="hidden" @change="handleFileChange" />
   </div>
@@ -107,7 +109,7 @@
 <script setup lang="ts">
 import QuestionItem from '~/components/features/test/QuestionItem.vue'
 import MetricItem from '~/components/features/test/MetricItem.vue'
-
+import ReportBuilder from './ReportBuilder.vue'
 const store = useTestBuilderStore()
 const fileInput = ref<HTMLInputElement | null>(null)
 

@@ -1,87 +1,74 @@
 <template>
   <div>
-    <div class="flex items-center gap-3">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-3xl BP-B text-green-dark">Мои опросники</h1>
+      <div class="flex items-center gap-3">
         <button
-            @click="fileInput?.click()"
-            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+          @click="fileInput?.click()"
+          class="px-4 py-2 border-2 border-gray-light text-gray-medium G-M rounded hover:border-green-dark hover:text-green-dark transition"
         >
-            Импорт JSON
+          Импорт JSON
         </button>
         <NuxtLink
-            to="/psychologist/tests/create"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          to="/psychologist/tests/create"
+          class="px-6 py-2 bg-green-bright text-white BP-B rounded hover:bg-green-dark transition"
         >
-            + Создать тест
+          + Создать тест
         </NuxtLink>
+      </div>
     </div>
 
-    <!-- Таблица тестов -->
-    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+    <div class="bg-white rounded-2xl overflow-hidden" style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
       <table class="w-full">
-        <thead class="bg-gray-50 border-b border-gray-200">
+        <thead class="bg-bg-light border-b border-gray-light">
           <tr>
-            <th class="text-left px-6 py-4 text-sm font-medium text-gray-500">Название</th>
-            <th class="text-left px-6 py-4 text-sm font-medium text-gray-500">Заполнили</th>
-            <th class="text-left px-6 py-4 text-sm font-medium text-gray-500">Последнее заполнение</th>
-            <th class="text-left px-6 py-4 text-sm font-medium text-gray-500">Статус</th>
-            <th class="text-left px-6 py-4 text-sm font-medium text-gray-500">Действия</th>
+            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">Название</th>
+            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">Заполнили</th>
+            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">Последнее заполнение</th>
+            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">Статус</th>
+            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">Действия</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="tests.length === 0">
-            <td colspan="5" class="text-center py-12 text-gray-400">
+            <td colspan="5" class="text-center py-12 G-M text-gray-light">
               Тестов пока нет. Создайте первый!
             </td>
           </tr>
           <tr
             v-for="test in tests"
             :key="test.id"
-            class="border-b border-gray-100 hover:bg-gray-50"
+            class="border-b border-bg-light hover:bg-bg-light transition"
           >
             <td class="px-6 py-4">
-              <p class="font-medium text-gray-800">{{ test.title }}</p>
+              <p class="BP-M text-green-dark">{{ test.title }}</p>
             </td>
-            <td class="px-6 py-4 text-gray-600">{{ test.submissions_count }}</td>
-            <td class="px-6 py-4 text-gray-600">{{ test.last_submission_at ? formatDate(test.last_submission_at) : '—' }}</td>
+            <td class="px-6 py-4 G-M text-gray-medium">{{ test.submissions_count }}</td>
+            <td class="px-6 py-4 G-M text-gray-medium">{{ test.last_submission_at ? formatDate(test.last_submission_at) : '—' }}</td>
             <td class="px-6 py-4">
               <span
-                :class="test.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
-                class="px-2 py-1 rounded-full text-xs font-medium"
+                :class="test.status === 'published' ? 'bg-green-light text-green-dark' : 'bg-bg-light text-gray-medium'"
+                class="px-3 py-1 rounded-full text-xs G-M"
               >
                 {{ test.status === 'published' ? 'Опубликован' : 'Черновик' }}
               </span>
             </td>
             <td class="px-6 py-4">
-              <div class="flex items-center gap-2">
-                <button
-                  @click="copyLink(test)"
-                  class="text-sm text-blue-500 hover:text-blue-700"
-                >
+              <div class="flex items-center gap-3 flex-wrap">
+                <button @click="copyLink(test)" class="text-sm G-M text-green-bright hover:text-green-dark transition">
                   Скопировать ссылку
                 </button>
-                <NuxtLink
-                  :to="`/psychologist/tests/${test.id}/submissions`"
-                  class="text-sm text-gray-500 hover:text-gray-700"
-                >
+                <NuxtLink :to="`/psychologist/tests/${test.id}/submissions`" class="text-sm G-M text-gray-medium hover:text-green-dark transition">
                   Результаты
                 </NuxtLink>
-                <NuxtLink
-                  :to="`/psychologist/tests/${test.id}/edit`"
-                  class="text-sm text-gray-500 hover:text-gray-700"
-                >
+                <NuxtLink :to="`/psychologist/tests/${test.id}/edit`" class="text-sm G-M text-gray-medium hover:text-green-dark transition">
                   Редактировать
                 </NuxtLink>
-                <button
-                  @click="deleteTest(test.id)"
-                  class="text-sm text-red-400 hover:text-red-600"
-                >
-                  Удалить
+                <button @click="exportTest(test)" class="text-sm G-M text-gray-medium hover:text-green-dark transition">
+                  Экспорт
                 </button>
-                <button
-                @click="exportTest(test)"
-                class="text-sm text-gray-500 hover:text-gray-700"
-                >
-                Экспорт
+                <button @click="deleteTest(test.id)" class="text-sm G-M text-bg-red hover:text-red-900 transition">
+                  Удалить
                 </button>
               </div>
             </td>

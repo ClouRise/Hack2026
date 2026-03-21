@@ -1,49 +1,48 @@
 <template>
   <div class="max-w-2xl mx-auto">
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">Личный кабинет</h1>
+    <h1 class="text-3xl BP-B text-green-dark mb-6">Личный кабинет</h1>
 
-    <div class="bg-white rounded-2xl shadow-sm p-6 mb-4">
+    <div class="bg-white rounded-2xl p-6 mb-4" style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
       <!-- Фото -->
       <div class="flex items-center gap-6 mb-6">
         <div class="relative">
           <img
             :src="avatar || '/default-avatar.png'"
-            class="w-24 h-24 rounded-full object-cover border border-gray-200"
+            class="w-24 h-24 rounded-full object-cover border-2 border-green-light"
           />
           <button
             @click="fileInput?.click()"
-            class="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm hover:bg-blue-700"
+            class="absolute bottom-0 right-0 bg-green-bright text-white rounded-full w-7 h-7 flex items-center justify-center text-sm hover:bg-green-dark transition"
           >
             ✎
           </button>
           <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="handleAvatarChange" />
         </div>
         <div>
-          <p class="font-semibold text-lg text-gray-800">{{ authStore.user?.name }}</p>
-          <p class="text-sm text-gray-500">Психолог</p>
+          <p class="BP-B text-lg text-green-dark">{{ authStore.user?.name }}</p>
+          <p class="G-M text-sm text-gray-medium">Психолог</p>
         </div>
       </div>
 
       <!-- Нередактируемые поля -->
       <div class="flex flex-col gap-3 mb-6">
         <div>
-          <label class="block text-sm font-medium text-gray-500 mb-1">ФИО</label>
-          <p class="px-4 py-2 bg-gray-50 rounded-lg text-gray-700">{{ authStore.user?.name }}</p>
+          <label class="block text-[10pt] G-M text-gray-light mb-1">ФИО</label>
+          <p class="px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M">{{ authStore.user?.name }}</p>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-500 mb-1">Email</label>
-          <p class="px-4 py-2 bg-gray-50 rounded-lg text-gray-700">{{ authStore.user?.email }}</p>
+          <label class="block text-[10pt] G-M text-gray-light mb-1">Email</label>
+          <p class="px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M">{{ authStore.user?.email }}</p>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-500 mb-1">Телефон</label>
-          <p class="px-4 py-2 bg-gray-50 rounded-lg text-gray-700">{{ authStore.user?.phone ?? '—' }}</p>
+          <label class="block text-[10pt] G-M text-gray-light mb-1">Телефон</label>
+          <p class="px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M">{{ authStore.user?.phone ?? '—' }}</p>
         </div>
       </div>
 
       <!-- О себе -->
       <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700 mb-1">О себе</label>
-        <p class="text-xs text-gray-400 mb-2">Поддерживается Markdown: **жирный**, *курсив*, # заголовок</p>
+        <label class="block text-[10pt] G-M text-gray-light mb-1">О себе</label>
         <ClientOnly>
           <RichTextEditor v-model="about" />
         </ClientOnly>
@@ -52,13 +51,13 @@
       <div class="flex items-center justify-between">
         <button
           @click="showBusinessCard = true"
-          class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+          class="px-4 py-2 border-2 border-green-dark text-green-dark G-M rounded hover:bg-green-dark hover:text-bg-light transition"
         >
           Показать визитку
         </button>
         <button
           @click="handleSave"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          class="px-6 py-2 bg-green-bright text-white BP-B rounded hover:bg-green-dark transition"
         >
           Сохранить
         </button>
@@ -67,20 +66,19 @@
   </div>
 
   <!-- Модалка визитки -->
-  <div v-if="showBusinessCard" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showBusinessCard = false">
-    <div class="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 text-center">
+  <div v-if="showBusinessCard" class="fixed inset-0 bg-green-dark/70 flex items-center justify-center z-50" @click.self="showBusinessCard = false">
+    <div class="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 text-center" style="box-shadow: 0 4px 32px rgba(20,66,16,0.15);">
       <img
         :src="avatar || '/default-avatar.png'"
-        class="w-20 h-20 rounded-full object-cover mx-auto mb-4 border border-gray-200"
+        class="w-20 h-20 rounded-full object-cover mx-auto mb-4 border-2 border-green-light"
       />
-      <p class="font-bold text-xl mb-1">{{ authStore.user?.name }}</p>
-      <p class="text-gray-500 text-sm mb-4">Психолог</p>
-      <div v-html="renderedAbout" class="mb-6 text-left"
-      style="font-size: 14px; line-height: 1.6;"/>   
-       <!-- QR код -->
+      <p class="BP-B text-xl text-green-dark mb-1">{{ authStore.user?.name }}</p>
+      <p class="G-M text-gray-medium text-sm mb-4">Психолог</p>
+      <div v-html="renderedAbout" class="mb-6 text-left text-green-dark G-M"
+        style="font-size: 14px; line-height: 1.6;" />
       <img :src="qrCodeUrl" class="mx-auto mb-4" />
-      <p class="text-xs text-gray-400">Отсканируйте для перехода на страницу психолога</p>
-      <button @click="showBusinessCard = false" class="mt-4 text-sm text-gray-500 hover:text-gray-700">Закрыть</button>
+      <p class="text-xs text-gray-light G-M">Отсканируйте для перехода на страницу психолога</p>
+      <button @click="showBusinessCard = false" class="mt-4 text-sm G-M text-gray-medium hover:text-green-dark transition">Закрыть</button>
     </div>
   </div>
 </template>

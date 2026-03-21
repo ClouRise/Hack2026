@@ -1,41 +1,41 @@
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Психологи</h1>
+      <h1 class="text-3xl BP-B text-green-dark">Психологи</h1>
       <button
         @click="showCreateModal = true"
-        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        class="px-6 py-2 bg-green-bright text-white BP-B rounded hover:bg-green-dark transition"
       >
         + Создать психолога
       </button>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+    <div class="bg-white rounded-2xl overflow-hidden" style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
       <table class="w-full">
-        <thead class="bg-gray-50 border-b border-gray-200">
+        <thead class="bg-bg-light border-b border-gray-light">
           <tr>
-            <th class="text-left px-6 py-4 text-sm font-medium text-gray-500">ФИО</th>
-            <th class="text-left px-6 py-4 text-sm font-medium text-gray-500">Email</th>
-            <th class="text-left px-6 py-4 text-sm font-medium text-gray-500">Дата регистрации</th>
-            <th class="text-left px-6 py-4 text-sm font-medium text-gray-500">Доступ до</th>
-            <th class="text-left px-6 py-4 text-sm font-medium text-gray-500">Статус</th>
-            <th class="text-left px-6 py-4 text-sm font-medium text-gray-500">Действия</th>
+            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">ФИО</th>
+            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">Email</th>
+            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">Дата регистрации</th>
+            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">Доступ до</th>
+            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">Статус</th>
+            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">Действия</th>
           </tr>
         </thead>
         <tbody>
           <tr
             v-for="psychologist in psychologists"
             :key="psychologist.id"
-            class="border-b border-gray-100 hover:bg-gray-50"
+            class="border-b border-bg-light hover:bg-bg-light transition"
           >
-            <td class="px-6 py-4 font-medium text-gray-800">{{ psychologist.name }}</td>
-            <td class="px-6 py-4 text-gray-600">{{ psychologist.email }}</td>
-            <td class="px-6 py-4 text-gray-600">{{ formatDate(psychologist.created_at) }}</td>
-            <td class="px-6 py-4 text-gray-600">{{ psychologist.access_until ?? 'Не ограничен' }}</td>
+            <td class="px-6 py-4 BP-M text-green-dark">{{ psychologist.name }}</td>
+            <td class="px-6 py-4 G-M text-gray-medium">{{ psychologist.email }}</td>
+            <td class="px-6 py-4 G-M text-gray-medium">{{ formatDate(psychologist.created_at) }}</td>
+            <td class="px-6 py-4 G-M text-gray-medium">{{ psychologist.access_until ?? 'Не ограничен' }}</td>
             <td class="px-6 py-4">
               <span
-                :class="psychologist.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'"
-                class="px-2 py-1 rounded-full text-xs font-medium"
+                :class="psychologist.is_active ? 'bg-green-light text-green-dark' : 'bg-bg-red text-bg-light'"
+                class="px-3 py-1 rounded-full text-xs G-M"
               >
                 {{ psychologist.is_active ? 'Активен' : 'Заблокирован' }}
               </span>
@@ -44,14 +44,14 @@
               <div class="flex items-center gap-3">
                 <button
                   @click="openEditModal(psychologist)"
-                  class="text-sm text-blue-500 hover:text-blue-700"
+                  class="text-sm G-M text-gray-medium hover:text-green-dark transition"
                 >
                   Редактировать
                 </button>
                 <button
                   @click="toggleBlock(psychologist)"
-                  :class="psychologist.is_active ? 'text-red-400 hover:text-red-600' : 'text-green-500 hover:text-green-700'"
-                  class="text-sm"
+                  :class="psychologist.is_active ? 'text-bg-red hover:text-red-800' : 'text-green-bright hover:text-green-dark'"
+                  class="text-sm G-M transition"
                 >
                   {{ psychologist.is_active ? 'Заблокировать' : 'Разблокировать' }}
                 </button>
@@ -62,44 +62,44 @@
       </table>
     </div>
 
-    <!-- Модалка создания/редактирования -->
-    <div v-if="showCreateModal || showEditModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="closeModals">
-      <div class="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
-        <h2 class="text-lg font-semibold mb-4">{{ showEditModal ? 'Редактировать психолога' : 'Создать психолога' }}</h2>
+    <!-- Модалка -->
+    <div v-if="showCreateModal || showEditModal" class="fixed inset-0 bg-green-dark/70 flex items-center justify-center z-50" @click.self="closeModals">
+      <div class="bg-white rounded-2xl p-6 w-full max-w-md mx-4" style="box-shadow: 0 4px 32px rgba(20,66,16,0.15);">
+        <h2 class="text-xl BP-B text-green-dark mb-6">{{ showEditModal ? 'Редактировать психолога' : 'Создать психолога' }}</h2>
 
         <div class="flex flex-col gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">ФИО</label>
+            <label class="block text-[10pt] G-M text-gray-light mb-1">ФИО</label>
             <input v-model="form.name" type="text" placeholder="Иванов Иван Иванович"
-              class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label class="block text-[10pt] G-M text-gray-light mb-1">Email</label>
             <input v-model="form.email" type="email" placeholder="ivan@example.com"
-              class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Телефон</label>
+            <label class="block text-[10pt] G-M text-gray-light mb-1">Телефон</label>
             <input v-model="form.phone" type="text" placeholder="+7 999 999 99 99"
-              class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright" />
           </div>
           <div v-if="!showEditModal">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Пароль</label>
+            <label class="block text-[10pt] G-M text-gray-light mb-1">Пароль</label>
             <input v-model="form.password" type="password" placeholder="Придумайте пароль"
-              class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Доступ до</label>
+            <label class="block text-[10pt] G-M text-gray-light mb-1">Доступ до</label>
             <input v-model="form.access_until" type="date"
-              class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright" />
           </div>
         </div>
 
         <div class="flex gap-3 mt-6">
-          <button @click="closeModals" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+          <button @click="closeModals" class="flex-1 px-4 py-2 border-2 border-gray-light text-gray-medium G-M rounded hover:border-green-dark hover:text-green-dark transition">
             Отмена
           </button>
-          <button @click="handleSubmit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <button @click="handleSubmit" class="flex-1 px-4 py-2 bg-green-bright text-white BP-B rounded hover:bg-green-dark transition">
             {{ showEditModal ? 'Сохранить' : 'Создать' }}
           </button>
         </div>
@@ -119,7 +119,7 @@ interface Psychologist {
   email: string
   phone?: string
   created_at: string
-  access_until: string | null
+  access_until: string | null 
   is_active: boolean
 }
 
