@@ -7,11 +7,11 @@
       <h1 class="text-3xl BP-B text-green-dark">Мои опросники</h1>
       <div class="flex items-center gap-3">
         <button @click="fileInput?.click()"
-          class="px-4 py-2 border-2 border-gray-light text-gray-medium G-M rounded hover:border-green-dark hover:text-green-dark transition">
+          class="px-4 py-2 border-2 border-gray-light bg-white text-gray-medium G-M rounded hover:border-green-dark hover:text-green-dark transition">
           Импорт JSON
         </button>
         <NuxtLink to="/psychologist/tests/create"
-          class="px-6 py-2 bg-green-bright text-white BP-B rounded hover:bg-green-dark transition">
+          class="px-6 py-2 text-white text-xl BP-B rounded bg-green-bright hover:bg-green-bright transition">
           + Создать тест
         </NuxtLink>
       </div>
@@ -21,9 +21,9 @@
       <table class="w-full">
         <thead class="bg-bg-light border-b border-gray-light">
           <tr>
-            <th class="text-left px-6 py-3 leading-[1.1] w-32 text-lg G-M text-gray-medium">Название</th>
-            <th class="text-left px-6 py-3 leading-[1.1] w-24 text-sm G-M text-gray-medium">Прошли</th>
-            <th class="text-left px-6 py-3 leading-[1.1] w-32 text-sm G-M text-gray-medium">Последнее заполнение</th>
+            <th class="text-left px-6 py-3 leading-[1.1] w-48 text-lg G-M text-gray-medium">Название</th>
+            <th class="text-left px-6 py-3 leading-[1.1] w-32 text-sm G-M text-gray-medium">Прошли</th>
+            <th class="text-left px-6 py-3 leading-[1.1] w-48 text-sm G-M text-gray-medium">Последнее заполнение</th>
             <th class="text-left px-6 py-3 leading-[1.1] text-sm G-M text-gray-medium">Статус</th>
             <th class="text-left px-6 py-3 leading-[1.1] text-sm G-M text-gray-medium">Действия</th>
           </tr>
@@ -36,7 +36,7 @@
           </tr>
           <tr v-for="test in tests" :key="test.id" class="border-b border-bg-light hover:bg-bg-light transition">
             <td class="px-6 py-4">
-              <p class="BP-B leading-[1.1] text-green-dark">{{ test.title }}</p>
+              <p class="BP-B leading-[1.1] text-lg text-green-dark">{{ test.title }}</p>
             </td>
             <td class="px-6 py-4 G-M text-gray-medium">{{ test.submissions_count }}</td>
             <td class="px-6 py-4 G-M text-gray-medium">{{ test.last_submission_at ? formatDate(test.last_submission_at)
@@ -53,7 +53,7 @@
                 <!-- Левая часть - текстовые ссылки -->
                 <div class="flex items-center gap-3">
                   <button @click="copyLink(test)"
-                    class="text-sm G-M text-green-bright hover:text-green-dark transition whitespace-nowrap">
+                    class="text-sm G-M cursor-pointer text-green-bright hover:text-green-dark transition whitespace-nowrap">
                     Скопировать ссылку
                   </button>
                   <NuxtLink :to="`/psychologist/tests/${test.id}/submissions`"

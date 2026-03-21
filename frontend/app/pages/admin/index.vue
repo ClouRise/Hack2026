@@ -4,22 +4,22 @@
       <h1 class="text-3xl BP-B text-green-dark">Психологи</h1>
       <button
         @click="showCreateModal = true"
-        class="px-6 py-2 bg-green-bright text-white BP-B rounded hover:bg-green-dark transition"
+        class="px-6 cursor-pointer py-2 text-white text-xl BP-B rounded bg-green-bright hover:bg-green-bright transition"
       >
         + Создать психолога
       </button>
     </div>
 
-    <div class="bg-white rounded-2xl overflow-hidden" style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
+    <div class="bg-white rounded-lg overflow-hidden card-test-shadows">
       <table class="w-full">
         <thead class="bg-bg-light border-b border-gray-light">
           <tr>
-            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">ФИО</th>
-            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">Email</th>
-            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">Дата регистрации</th>
-            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">Доступ до</th>
-            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">Статус</th>
-            <th class="text-left px-6 py-4 text-sm G-M text-gray-medium">Действия</th>
+            <th class="text-left px-6 py-3 leading-[1.1] text-lg G-M text-gray-medium">ФИО</th>
+            <th class="text-left px-6 py-3 leading-[1.1] text-sm G-M text-gray-medium">Email</th>
+            <th class="text-left px-6 py-3 leading-[1.1] text-sm G-M text-gray-medium">Дата регистрации</th>
+            <th class="text-left px-6 py-3 leading-[1.1] text-sm G-M text-gray-medium">Доступ до</th>
+            <th class="text-left px-6 py-3 leading-[1.1] text-sm G-M text-gray-medium">Статус</th>
+            <th class="text-left px-6 py-3 leading-[1.1] text-sm G-M text-gray-medium">Действия</th>
           </tr>
         </thead>
         <tbody>
@@ -28,14 +28,16 @@
             :key="psychologist.id"
             class="border-b border-bg-light hover:bg-bg-light transition"
           >
-            <td class="px-6 py-4 BP-M text-green-dark">{{ psychologist.name }}</td>
+            <td class="px-6 py-4">
+              <p class="BP-B leading-[1.1] text-green-dark">{{ psychologist.name }}</p>
+            </td>
             <td class="px-6 py-4 G-M text-gray-medium">{{ psychologist.email }}</td>
             <td class="px-6 py-4 G-M text-gray-medium">{{ formatDate(psychologist.created_at) }}</td>
             <td class="px-6 py-4 G-M text-gray-medium">{{ psychologist.access_until ?? 'Не ограничен' }}</td>
             <td class="px-6 py-4">
               <span
-                :class="psychologist.is_active ? 'bg-green-light text-green-dark' : 'bg-bg-red text-bg-light'"
-                class="px-3 py-1 rounded-full text-xs G-M"
+                :class="psychologist.is_active ? 'bg-bg-light border-l-[5px] border-green-bright text-green-dark2' : 'border-l-[5px] blocked-user'"
+                class="px-3 py-2 text-xs G-M"
               >
                 {{ psychologist.is_active ? 'Активен' : 'Заблокирован' }}
               </span>
@@ -44,14 +46,13 @@
               <div class="flex items-center gap-3">
                 <button
                   @click="openEditModal(psychologist)"
-                  class="text-sm G-M text-gray-medium hover:text-green-dark transition"
+                  class="text-sm G-M cursor-pointer text-green-600 hover:text-green-800 whitespace-nowrap"
                 >
                   Редактировать
                 </button>
                 <button
                   @click="toggleBlock(psychologist)"
-                  :class="psychologist.is_active ? 'text-bg-red hover:text-red-800' : 'text-green-bright hover:text-green-dark'"
-                  class="text-sm G-M transition"
+                  class="text-sm G-M whitespace-nowrap cursor-pointer text-gray-600 hover:text-gray-800"
                 >
                   {{ psychologist.is_active ? 'Заблокировать' : 'Разблокировать' }}
                 </button>
@@ -203,3 +204,10 @@ function handleSubmit() {
   // TODO: подключить API
 }
 </script>
+
+<style lang="css" scoped>
+.blocked-user{
+  background-color: #EEDBDB;
+  border-color: #754444;
+}
+</style>
