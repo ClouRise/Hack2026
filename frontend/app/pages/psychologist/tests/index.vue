@@ -1,5 +1,8 @@
 <template>
   <div>
+    <p class="text-sm G-M text-gray-medium mb-4">
+      Доступ до: <span class="text-green-dark BP-M">{{ authStore.user?.access_until ?? 'не ограничен' }}</span>
+    </p>
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-3xl BP-B text-green-dark">Мои опросники</h1>
       <div class="flex items-center gap-3">
@@ -85,6 +88,7 @@ definePageMeta({
   middleware: []
 })
 
+const authStore = useAuthStore()
 const fileInput = ref<HTMLInputElement | null>(null)
 
 
