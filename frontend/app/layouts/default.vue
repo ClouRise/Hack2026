@@ -2,10 +2,10 @@
   <div class="min-h-screen bg-gray-50">
     <nav class="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
       <div class="flex items-center gap-4">
-        <NuxtLink to="/psychologist" class="bg-green-500 px-4 py-1 text-white rounded hover:bg-green-600 text-xl BP-B">
+        <NuxtLink to="/psychologist/tests/create" class="bg-green-500 px-4 py-1 text-white rounded hover:bg-green-600 text-xl BP-B">
           Создать тест
         </NuxtLink>
-        <NuxtLink to="/psychologist" class="text-gray-600 text-green-dark hover:text-gray-main ml-4 text-xl BP-B">
+        <NuxtLink to="/psychologist/tests" class="text-gray-600 text-green-dark hover:text-gray-main ml-4 text-xl BP-B">
           Мои опросники
         </NuxtLink>
       </div>

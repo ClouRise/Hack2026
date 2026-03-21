@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = useCookie('token')
-  const user = ref<{ id: number; name: string; role: 'admin' | 'psychologist' } | null>(null)
+  const user = ref<{ id: number; name: string; role: 'admin' | 'psychologist'; email: string; phone?: string } | null>(null)
   const config = useRuntimeConfig()
 
   const isAuthenticated = computed(() => !!token.value)
@@ -23,11 +23,11 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function fetchProfile() {
-    user.value = await $fetch<{ id: number; name: string; role: 'admin' | 'psychologist' }>('/profile', {
-      baseURL: config.public.apiBase as string,
-      headers: { Authorization: `Bearer ${token.value}` }
-    })
-  }
+    user.value = await $fetch<{ id: number; name: string; role: 'admin' | 'psychologist'; email: string; phone?: string }>('/profile', {
+    baseURL: config.public.apiBase as string,
+    headers: { Authorization: `Bearer ${token.value}` }
+  })
+}
 
   function logout() {
     token.value = null

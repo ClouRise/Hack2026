@@ -25,6 +25,7 @@
           <option value="avg">Среднее</option>
           <option value="min">Минимум</option>
           <option value="max">Максимум</option>
+          <option value="percent">Процент (сумма / макс × 100)</option>
         </select>
       </div>
 
@@ -70,8 +71,42 @@
 
     <!-- Превью формулы -->
     <p class="text-xs text-gray-400">
-      Формула: {{ metric.operation }}({{ metric.question_ids.length }} вопросов) × {{ metric.coefficient }}
+        Формула: 
+        <span v-if="metric.operation === 'percent'">
+            сумма({{ metric.question_ids.length }} вопросов) / макс × 100 × {{ metric.coefficient }}
+        </span>
+        <span v-else>
+            {{ metric.operation }}({{ metric.question_ids.length }} вопросов) × {{ metric.coefficient }}
+        </span>
     </p>
+
+    <!-- Интерпретации -->
+    <div class="flex flex-col gap-2">
+        <label class="text-sm text-gray-500">Интерпретации результата:</label>
+
+        <div v-for="(interp, index) in metric.interpretations" :key="index" class="border border-gray-100 rounded-lg p-3 flex flex-col gap-2">
+            <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-400">от</span>
+            <input v-model.number="interp.from" type="number" class="w-16 border border-gray-300 rounded px-2 py-1 text-sm" />
+            <span class="text-xs text-gray-400">до</span>
+            <input v-model.number="interp.to" type="number" class="w-16 border border-gray-300 rounded px-2 py-1 text-sm" />
+            <button @click="metric.interpretations.splice(index, 1)" class="text-red-400 hover:text-red-600">✕</button>
+            </div>
+            <textarea
+            v-model="interp.description"
+            placeholder="Текст для отчёта при этом результате..."
+            rows="2"
+            class="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+            />
+        </div>
+
+        <button
+            @click="metric.interpretations.push({ from: 0, to: 0, description: '' })"
+            class="text-sm text-blue-500 hover:text-blue-700 text-left"
+        >
+            + Добавить интерпретацию
+        </button>
+    </div>
   </div>
 </template>
 

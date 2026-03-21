@@ -18,15 +18,6 @@ export interface QuestionOption {
   next_question_id: string | null
 }
 
-export interface BranchingCondition {
-  if_options_selected: string[]
-  next_question_id: string | null
-}
-
-export interface Branching {
-  conditions: BranchingCondition[]
-  default_next: string | null
-}
 
 export interface ScoreRange {
   from: number
@@ -45,7 +36,6 @@ export interface Question {
   options: QuestionOption[]       // для single_choice, multiple_choice
   min?: number                     // для slider, rating
   max?: number                     // для slider, rating
-  branching: Branching | null
   date_subtype?: 'date' | 'time' | 'datetime'
   score_ranges?: ScoreRange[]
 }
@@ -70,6 +60,12 @@ export interface TestMeta {
   client_fields: ClientField[]         // доп. поля которые клиент заполняет перед тестом
 }
 
+export interface MetricInterpretation {
+  from: number
+  to: number   // "Высокий уровень"
+  description: string  // текст для отчёта
+}
+
 export interface Metric {
   id: string
   name: string
@@ -77,6 +73,7 @@ export interface Metric {
   question_ids: string[]
   coefficient: number
   description: string
+  interpretations: MetricInterpretation[]
 }
 
 export const useTestBuilderStore = defineStore('testBuilder', () => {
@@ -118,7 +115,6 @@ export const useTestBuilderStore = defineStore('testBuilder', () => {
       required: true,
       hidden_by_default: false,
       options: [],
-      branching: null,
       score_ranges: []   
     })
   }
@@ -187,7 +183,8 @@ export const useTestBuilderStore = defineStore('testBuilder', () => {
         operation: 'sum',
         question_ids: [],
         coefficient: 1,
-        description: ''
+        description: '',    
+        interpretations: []
     })
     }
 
