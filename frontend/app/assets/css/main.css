@@ -556,3 +556,30 @@ input[type="checkbox"]:checked::after {
     color: white;
     backdrop-filter: blur(2px);
 }
+
+.edit-icon{
+    background-image: url(../images/edit.svg);
+    width: 30px;
+    height: 30px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 80%;
+}
+
+.trash-icon{
+    background-image: url(../images/trash.svg);
+    width: 30px;
+    height: 30px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 80%;
+}
+
+.export-icon{
+    background-image: url(../images/export.svg);
+    width: 30px;
+    height: 30px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 80%;
+}
