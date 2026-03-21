@@ -73,11 +73,12 @@
   <!-- ВОТ ЭТО МЕНЯЕМ -->
   <VueDraggable
   v-model="section.questions"
-  :group="{ name: 'questions', pull: true, put: true }"
+  :group="{ name: 'questions', pull: true, put: ['questions'] }"
   :animation="200"
   handle=".drag-handle"
-  ghost-class="opacity-30"
-  class="flex flex-col gap-4 min-h-[60px]"
+  ghost-class="ghost-question"
+  class="questions-drop-zone flex flex-col gap-4 min-h-[80px] rounded-xl border-2 border-dashed transition-all"
+  :class="section.questions.length > 0 ? 'border-transparent' : 'border-gray-light'"
   @update="() => recalcOrder(section.id)"
   @add="() => recalcOrder(section.id)"
 >
@@ -154,3 +155,32 @@ function recalcOrder(sectionId: string) {
 
 defineExpose({ fileInput })
 </script>
+
+<style>
+.ghost-question {
+  opacity: 1 !important;
+  background: #f1faf0;
+  border: 2px dashed #8ed993 !important;
+  border-radius: 12px;
+  box-shadow: none !important;
+}
+
+.ghost-question * {
+  opacity: 0.3;
+}
+.questions-drop-zone:not(:has(> div))::before {
+  content: 'Перетащите вопрос из палитры';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 2rem 0;
+  color: #9bb299;
+  font-size: 14px;
+  font-family: 'GothamOffice-medium';
+}
+
+.questions-drop-zone:has(> div) {
+  border-color: transparent !important;
+}
+</style>
