@@ -47,7 +47,7 @@
                 <input v-model.number="option.weight" type="number"
                   class="w-16 px-2 py-1 bg-white border-b-2 border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright text-sm" />
               </div>
-              <div v-if="question.type === 'single_choice'" class="flex items-center gap-2">
+              <div v-if="question.type === 'single_choice' || question.type === 'yes_no'" class="flex items-center gap-2">
                 <label class="text-xs G-M text-gray-medium">Перейти к вопросу:</label>
                 <select v-model="option.next_question_id"
                   class="px-2 py-1 bg-white border-b-2 border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright text-sm">
