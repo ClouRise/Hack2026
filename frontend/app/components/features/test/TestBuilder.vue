@@ -59,29 +59,41 @@
       </button>
     </div>
 
-    <!-- Секции -->
-    <div v-for="section in store.sections" :key="section.id" class="bg-white rounded-2xl p-6 mb-4" style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
-      <div class="flex items-center justify-between mb-4">
-        <input v-model="section.title" type="text"
-          class="text-xl BP-B text-green-dark border-none outline-none bg-transparent w-full"
-          placeholder="Название раздела" />
-        <button @click="store.removeSection(section.id)" class="text-sm G-M text-red-400 hover:text-red-900 w-[200px] ml-2">
-          Удалить раздел
-        </button>
-      </div>
-      <div class="flex flex-col gap-4">
-        <QuestionItem
-          v-for="question in section.questions"
-          :key="question.id"
-          :question="question"
-          :section-id="section.id"
-        />
-      </div>
-      <button @click="store.addQuestion(section.id)"
-        class="mt-4 w-full border-2 border-dashed border-green-light rounded-lg py-3 G-M hover:border-green-bright hover:text-green-bright transition">
-        + Добавить вопрос
-      </button>
-    </div>
+   <!-- Секции -->
+<div v-for="section in store.sections" :key="section.id" class="bg-white rounded-2xl p-6 mb-4" style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
+  <div class="flex items-center justify-between mb-4">
+    <input v-model="section.title" type="text"
+      class="text-xl BP-B text-green-dark border-none outline-none bg-transparent w-full"
+      placeholder="Название раздела" />
+    <button @click="store.removeSection(section.id)" class="text-sm G-M text-red-400 hover:text-red-900 w-[200px] ml-2">
+      Удалить раздел
+    </button>
+  </div>
+
+  <!-- ВОТ ЭТО МЕНЯЕМ -->
+  <VueDraggable
+  v-model="section.questions"
+  :group="{ name: 'questions', pull: true, put: true }"
+  :animation="200"
+  handle=".drag-handle"
+  ghost-class="opacity-30"
+  class="flex flex-col gap-4 min-h-[60px]"
+  @update="() => recalcOrder(section.id)"
+  @add="() => recalcOrder(section.id)"
+>
+  <QuestionItem
+    v-for="question in section.questions"
+    :key="question.id"
+    :question="question"
+    :section-id="section.id"
+  />
+</VueDraggable>
+
+  <button @click="store.addQuestion(section.id)"
+    class="mt-4 w-full border-2 border-dashed border-green-light rounded-lg py-3 G-M hover:border-green-bright hover:text-green-bright transition">
+    + Добавить вопрос
+  </button>
+</div>
 
     <button @click="store.addSection()"
       class="w-full border-2 border-dashed border-green-light bg-opacity-darken rounded-xl py-4 G-M text-gray-medium hover:border-green-bright hover:text-green-bright transition mb-4">
@@ -107,9 +119,11 @@
 </template>
 
 <script setup lang="ts">
+import { VueDraggable } from 'vue-draggable-plus'
 import QuestionItem from '~/components/features/test/QuestionItem.vue'
 import MetricItem from '~/components/features/test/MetricItem.vue'
 import ReportBuilder from './ReportBuilder.vue'
+
 const store = useTestBuilderStore()
 const fileInput = ref<HTMLInputElement | null>(null)
 
@@ -127,6 +141,16 @@ function handleFileChange(event: Event) {
   }
   reader.readAsText(file)
 }
+
+function recalcOrder(sectionId: string) {
+  const section = store.sections.find(s => s.id === sectionId)
+  if (!section) return
+  section.questions.forEach((q, index) => {
+    q.order = index + 1
+    q.section_id = sectionId // фиксим section_id для элементов из палитры
+  })
+}
+
 
 defineExpose({ fileInput })
 </script>

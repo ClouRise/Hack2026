@@ -1,6 +1,16 @@
 <template>
   <div class="bg-white border border-gray-light rounded-xl p-4" style="box-shadow: 0 2px 12px rgba(20,66,16,0.06);">
     <div class="flex items-start gap-3">
+      <div class="drag-handle cursor-grab active:cursor-grabbing select-none text-gray-light hover:text-green-dark transition mt-3">
+      <svg width="14" height="22" viewBox="0 0 16 24" fill="currentColor">
+        <circle cx="5" cy="6" r="2"/>
+        <circle cx="11" cy="6" r="2"/>
+        <circle cx="5" cy="12" r="2"/>
+        <circle cx="11" cy="12" r="2"/>
+        <circle cx="5" cy="18" r="2"/>
+        <circle cx="11" cy="18" r="2"/>
+      </svg>
+    </div>
       <span class="BP-B text-green-bright text-sm mt-3 min-w-[24px]">{{ question.order }}.</span>
       <div class="flex-1 flex flex-col gap-3">
 
