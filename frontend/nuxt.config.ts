@@ -18,4 +18,9 @@ export default defineNuxtConfig({
   }
   },
   srcDir: 'app/',
+  nitro: {
+    prerender: {
+      failOnError: false
+    }
+  }
 })

@@ -1,29 +1,16 @@
 import asyncio
-import os
-import sys
 from logging.config import fileConfig
-
-from alembic import context
+from app.db.base import Base
+from app import models
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-# Добавляем пути
-current_path = os.path.dirname(os.path.abspath(__file__))
-backend_path = os.path.dirname(os.path.dirname(current_path))
-sys.path.insert(0, backend_path)
-
-# Импорты
-from app.core.config import settings
-from app.db.base import Base
-from app.models.user import User
+from alembic import context
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-
-# Устанавливаем URL из настроек
-config.set_main_option("sqlalchemy.url", settings.ASYNC_DATABASE_URL)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

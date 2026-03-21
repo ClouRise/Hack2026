@@ -6,6 +6,8 @@ __pycache__/
 # C extensions
 *.so
 
+*logs
+app/migrations/versions/*.py
 # Distribution / packaging
 .Python
 build/
@@ -186,3 +188,4 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+backend/app/migrations/versions/
