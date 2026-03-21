@@ -8,7 +8,7 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-#from app.models.users import User as UserModel
+from app.models import User as UserModel
 from app.core.config import settings
 from app.db.session import get_db
 
