@@ -38,6 +38,7 @@ export interface Question {
   max?: number                     // для slider, rating
   date_subtype?: 'date' | 'time' | 'datetime'
   score_ranges?: ScoreRange[]
+  [key: string]: any
 }
 
 export interface Section {
