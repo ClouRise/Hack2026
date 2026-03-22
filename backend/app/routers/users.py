@@ -15,6 +15,8 @@ from app.auth import (
     verify_refresh_token,
     get_current_active_psychologist,
 )
+from fastapi import File, UploadFile
+from app.core.image import save_image 
 
 from app.schemas.users import (
     UpdateExistUser,
@@ -71,7 +73,8 @@ async def get_user_profile(
 
 @router.patch("/me", response_model=UserSchema)
 async def update_user_profile(
-    data: UpdateExistUser,
+    data: UpdateExistUser = Depends(),
+    photo: UploadFile | None = File(None),
     current_user: UserModel = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
@@ -79,11 +82,14 @@ async def update_user_profile(
     
     if data.phone is not None:
         current_user.phone = data.phone
-    if data.photo_url is not None:
-        current_user.photo_url = data.photo_url
     if data.bio is not None:
         current_user.bio = data.bio
-    
+
+    if photo is not None:
+        current_user.photo_url = await save_image(photo, foldername="users")
+    elif data.photo_url is not None:
+        current_user.photo_url = data.photo_url
+
     await db.commit()
     await db.refresh(current_user)
     
