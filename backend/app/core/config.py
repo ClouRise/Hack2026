@@ -1,5 +1,6 @@
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import SecretStr
 
 
 class Settings(BaseSettings):
@@ -46,6 +47,13 @@ class Settings(BaseSettings):
     BOOTSTRAP_ADMIN: bool = True
     BOOTSTRAP_ADMIN_EMAIL: str = "admin@example.com"
     BOOTSTRAP_ADMIN_PASSWORD: str = "admin"
+
+    #mail
+    MAIL_USERNAME: str = "dmitri.yanakov@gmail.com"
+    MAIL_PASSWORD: SecretStr = SecretStr("")
+    MAIL_FROM: str = "noreply@profdna.com"
+    MAIL_SERVER: str = "smtp.gmail.com"
+    MAIL_PORT: int = 587
 
     # Database
     DATABASE_URL: str | None = None
