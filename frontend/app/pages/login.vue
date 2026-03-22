@@ -76,8 +76,9 @@ async function handleLogin() {
 
   try {
     const role = await authStore.login(form.username, form.password)
+    console.log('ROLE:', role)
 
-    if (role === 'admin') {
+    if (role?.toLowerCase() === 'admin') {
       router.push('/admin')
     } else {
       router.push('/psychologist')

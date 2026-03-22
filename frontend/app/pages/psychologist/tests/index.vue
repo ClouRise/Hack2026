@@ -3,28 +3,29 @@
     <p class="text-sm G-M text-gray-medium mb-4">
       Доступ до: <span class="text-green-dark text-lg BP-M">{{ authStore.user?.access_until ?? 'не ограничен' }}</span>
     </p>
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-3xl BP-B text-green-dark">Мои опросники</h1>
-      <div class="flex items-center gap-3">
+
+    <!-- Шапка -->
+    <div class="mb-6">
+      <h1 class="text-2xl sm:text-3xl BP-B text-green-dark mb-3">Мои опросники</h1>
+      <div class="flex items-center gap-2">
         <button @click="fileInput?.click()"
-          class="px-4 py-2 border-2 border-gray-light bg-white text-gray-medium G-M rounded hover:border-green-dark hover:text-green-dark transition">
+          class="px-3 py-2 border-2 border-gray-light bg-white text-gray-medium G-M rounded hover:border-green-dark hover:text-green-dark transition text-sm">
           Импорт JSON
         </button>
         <NuxtLink to="/psychologist/tests/create"
-          class="px-6 py-2 text-white text-xl BP-B rounded bg-green-bright hover:bg-green-bright transition">
+          class="px-4 py-2 text-white text-sm sm:text-base BP-B rounded bg-green-bright hover:bg-green-bright transition">
           + Создать тест
         </NuxtLink>
       </div>
     </div>
 
-    <div class="bg-white rounded-lg overflow-hidden card-test-shadows">
+    <!-- ДЕСКТОП (md+): таблица -->
+    <div class="hidden md:block bg-white rounded-lg overflow-hidden card-test-shadows">
       <table class="w-full">
         <thead class="bg-bg-light border-b border-gray-light">
           <tr>
             <th class="text-left px-6 py-3 leading-[1.1] w-48 text-lg G-M text-gray-medium">Название</th>
             <th class="text-left px-6 py-3 leading-[1.1] w-32 text-sm G-M text-gray-medium">Прошли</th>
-            <th class="text-left px-6 py-3 leading-[1.1] w-48 text-sm G-M text-gray-medium">Последнее заполнение</th>
-            <th class="text-left px-6 py-3 leading-[1.1] text-sm G-M text-gray-medium">Статус</th>
             <th class="text-left px-6 py-3 leading-[1.1] text-sm G-M text-gray-medium">Действия</th>
           </tr>
         </thead>
@@ -34,23 +35,14 @@
               Тестов пока нет. Создайте первый!
             </td>
           </tr>
-          <tr v-for="test in tests" :key="test.id" class="border-b border-bg-light hover:bg-bg-light transition">
+          <tr v-for="test in tests" :key="test.id"
+            class="border-b border-bg-light hover:bg-bg-light transition">
             <td class="px-6 py-4">
               <p class="BP-B leading-[1.1] text-lg text-green-dark">{{ test.title }}</p>
             </td>
             <td class="px-6 py-4 G-M text-gray-medium">{{ test.submissions_count }}</td>
-            <td class="px-6 py-4 G-M text-gray-medium">{{ test.last_submission_at ? formatDate(test.last_submission_at)
-              : '—' }}</td>
-            <td class="px-6 py-4">
-              <span
-                :class="test.status === 'published' ? 'bg-bg-light border-l-[5px] border-green-bright text-green-dark2' : 'bg-bg-light border-l-[5px] border-gray-light text-gray-medium'"
-                class="px-3 py-2 text-xs G-M">
-                {{ test.status === 'published' ? 'Опубликован' : 'Черновик' }}
-              </span>
-            </td>
             <td class="px-6 py-4">
               <div class="flex items-center justify-between gap-4">
-                <!-- Левая часть - текстовые ссылки -->
                 <div class="flex items-center gap-3">
                   <button @click="copyLink(test)"
                     class="text-sm G-M cursor-pointer text-green-bright hover:text-green-dark transition whitespace-nowrap">
@@ -61,17 +53,12 @@
                     Результаты
                   </NuxtLink>
                 </div>
-
-                <!-- Правая часть - иконки -->
                 <div class="flex items-center gap-2">
                   <NuxtLink :to="`/psychologist/tests/${test.id}/edit`"
                     class="edit-icon bg-gray-light rounded w-8 h-8 flex items-center justify-center hover:bg-gray-200 transition">
                   </NuxtLink>
                   <button @click="exportTest(test)"
                     class="export-icon bg-gray-light rounded w-8 h-8 flex items-center justify-center hover:bg-gray-200 transition cursor-pointer">
-                  </button>
-                  <button @click="deleteTest(test.id)"
-                    class="trash-icon bg-red-400 hover:bg-red-500 rounded w-8 h-8 flex items-center justify-center transition cursor-pointer">
                   </button>
                 </div>
               </div>
@@ -80,6 +67,57 @@
         </tbody>
       </table>
     </div>
+
+    <!-- МОБИЛЬНЫЙ + ПЛАНШЕТ (< md): карточки -->
+    <div class="md:hidden flex flex-col gap-3">
+
+      <div v-if="tests.length === 0"
+        class="bg-white rounded-lg p-8 text-center G-M text-gray-light card-test-shadows">
+        Тестов пока нет. Создайте первый!
+      </div>
+
+      <div v-for="test in tests" :key="test.id"
+        class="bg-white rounded-lg p-3 sm:p-4 card-test-shadows flex flex-col gap-3">
+
+        <!-- Название + счётчик -->
+        <div class="flex items-start justify-between gap-2">
+          <p class="BP-B text-base sm:text-lg text-green-dark leading-[1.2]">{{ test.title }}</p>
+          <span class="flex-shrink-0 text-xs G-M text-gray-medium bg-bg-light px-2 py-1 rounded-full whitespace-nowrap">
+            {{ test.submissions_count }} прошли
+          </span>
+        </div>
+
+        <!-- Действия -->
+        <div class="flex items-center border-t border-bg-light pt-2 gap-2">
+          <!-- Ссылки -->
+          <div class="flex flex-col gap-1 min-w-0">
+            <button @click="copyLink(test)"
+              class="text-xs G-M cursor-pointer text-green-bright hover:text-green-dark transition text-left truncate">
+              Скопировать ссылку
+            </button>
+            <NuxtLink :to="`/psychologist/tests/${test.id}/submissions`"
+              class="text-xs G-M text-gray-medium hover:text-green-dark transition">
+              Результаты
+            </NuxtLink>
+          </div>
+
+          <!-- Иконки -->
+          <div class="flex items-center gap-1 ml-auto flex-shrink-0">
+            <NuxtLink :to="`/psychologist/tests/${test.id}/edit`"
+              class="edit-icon bg-gray-light rounded w-8 h-8 flex items-center justify-center hover:bg-gray-200 transition">
+            </NuxtLink>
+            <button @click="exportTest(test)"
+              class="export-icon bg-gray-light rounded w-8 h-8 flex items-center justify-center hover:bg-gray-200 transition cursor-pointer">
+            </button>
+            <button @click="deleteTest(test.id)"
+              class="trash-icon bg-red-400 hover:bg-red-500 rounded w-8 h-8 flex items-center justify-center transition cursor-pointer">
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </div>
   <input ref="fileInput" type="file" accept=".json" class="hidden" @change="handleFileImport" />
 </template>
@@ -89,39 +127,34 @@ definePageMeta({
   middleware: []
 })
 
-const authStore = useAuthStore()
-const fileInput = ref<HTMLInputElement | null>(null)
-
-
 interface Test {
   id: string
   title: string
-  status: 'draft' | 'published'
   submissions_count: number
-  last_submission_at: string | null
   token: string | null
 }
 
-// Моковые данные пока бэк не готов
-const tests = ref<Test[]>([
-  {
-    id: '1',
-    title: 'Тест на профориентацию',
-    status: 'published',
-    submissions_count: 12,
-    last_submission_at: '2026-03-20T10:00:00',
+const authStore = useAuthStore()
+const fileInput = ref<HTMLInputElement | null>(null)
+const tests = ref<Test[]>([])
+  const { api } = useApi()
 
-    token: 'abc123'
-  },
-  {
-    id: '2',
-    title: 'Тест на тревожность',
-    status: 'draft',
-    submissions_count: 0,
-    last_submission_at: null,
-    token: null
+  onMounted(async () => {
+  await authStore.fetchProfile()
+  
+  try {
+    const result = await api(`/users/my_tests/${authStore.user?.id}`) as any
+    tests.value = result.мои_опросники.map((t: any) => ({
+      id: t.id,
+      title: t.название,
+      submissions_count: t.прошли,
+      token: t.ссылка ?? null
+    }))
+  } catch (e) {
+    console.error('Ошибка загрузки тестов:', e)
   }
-])
+})
+
 
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString('ru-RU')

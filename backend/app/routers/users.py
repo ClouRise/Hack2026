@@ -14,12 +14,14 @@ from app.auth import (
     verify_password,
     create_access_token,
     create_refresh_token,
+    get_current_psychologist,
     verify_refresh_token,
     get_current_active_psychologist,
 )
 from fastapi import File, UploadFile
 from app.core.image import save_image 
 
+from sqlalchemy.orm import selectinload
 from app.schemas.users import (
     UpdateExistUser,
     UserSchema,
@@ -29,6 +31,9 @@ from app.schemas.users import (
 from app.models.user import User as UserModel, UserRole
 from app.db.session import get_db
 from app.core.config import settings
+from app.models.test import Test
+from app.models.sessions import Session
+from app.models.answers import Answer
 
 
 router = APIRouter(
@@ -201,6 +206,99 @@ async def login(
         "token_type": "bearer"
     }
 
+@router.get("/my_tests/{psychologist_id}")
+async def get_my_tests(
+    psychologist_id: uuid.UUID,  # ← ID психолога в параметрах
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Мои опросники:
+    - ID
+    - Название
+    - Ссылка на тест
+    - Количество прохождений
+    - Время доступа психолога
+    - Список прошедших (ФИО, дата заполнения)
+    """
+    
+    
+    stmt = select(UserModel).where(UserModel.id == psychologist_id).options(
+        selectinload(UserModel.tests).selectinload(Test.sessions)
+    )
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        raise HTTPException(404, "Пользователь не найден")
+    
+
+    my_tests = []
+    for test in user.tests:
+        if test.is_deleted:
+            continue
+        
+        
+        completed = [s for s in test.sessions]
+        
+        my_tests.append({
+            "id": str(test.id),
+            "название": test.title,
+            "ссылка": test.access_link,
+            "прошли": len(completed),
+            "время_доступа_психолога": user.access_until,
+            
+            "список_прошедших": [
+                {
+                    "id_session": session.id,
+                    "фио": session.client_name,
+                    "дата_заполнения": session.completed_at
+                }
+                for session in completed
+            ]
+        })
+    
+    return {
+        "количество_тестов": len(my_tests),
+        "мои_опросники": my_tests
+    }
+
+@router.get("/sessions/{session_id}/answers")
+async def get_session_answers(
+    session_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db)
+):
+    """Получить все ответы по сессии"""
+    
+    
+    stmt = select(Session).where(Session.id == session_id).options(
+        selectinload(Session.answers).selectinload(Answer.question)
+    )
+    result = await db.execute(stmt)
+    session = result.scalar_one_or_none()
+    
+    if not session:
+        raise HTTPException(404, "Сессия не найдена")
+    
+    return {
+        "session_id": str(session.id),
+        "client_name": session.client_name,
+        "test_id": str(session.test_id),
+        "completed_at": session.completed_at,
+        "progress": session.progress,
+        "metrics": session.metrics,  
+        
+        "answers": [
+            {
+                "question_id": str(answer.question_id),
+                "question_text": answer.question.text if answer.question else answer.question_text,
+                "question_type": answer.question.type.value if answer.question else None,
+                "answer_value": answer.value,
+                "answered_at": answer.answered_at
+            }
+            for answer in session.answers
+        ]
+    }
+
 
 @router.post("/refresh")
 async def refresh_token_endpoint(
@@ -259,7 +357,7 @@ async def refresh_token_endpoint(
     }
 
 
-@router.get("/psychologists", response_model=list[UserSchema])
+@router.get("/admin", response_model=list[UserSchema])
 async def get_psychologists(
     current_admin: UserModel = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db)

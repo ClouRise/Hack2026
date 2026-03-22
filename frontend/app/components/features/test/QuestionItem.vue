@@ -1,32 +1,34 @@
 <template>
-  <div class="bg-white border border-gray-light rounded-xl p-4" style="box-shadow: 0 2px 12px rgba(20,66,16,0.06);">
-    <div class="flex items-start gap-3">
+  <div class="bg-white border border-gray-light rounded-xl p-3 sm:p-4"
+    style="box-shadow: 0 2px 12px rgba(20,66,16,0.06);">
+    <div class="flex items-start gap-2 sm:gap-3">
+
+      <!-- Drag handle -->
       <div class="drag-handle cursor-grab active:cursor-grabbing select-none text-gray-light hover:text-green-dark transition mt-3">
-      <svg width="14" height="22" viewBox="0 0 16 24" fill="currentColor">
-        <circle cx="5" cy="6" r="2"/>
-        <circle cx="11" cy="6" r="2"/>
-        <circle cx="5" cy="12" r="2"/>
-        <circle cx="11" cy="12" r="2"/>
-        <circle cx="5" cy="18" r="2"/>
-        <circle cx="11" cy="18" r="2"/>
-      </svg>
-    </div>
-      <span class="BP-B text-green-bright text-sm mt-3 min-w-[24px]">{{ question.order }}.</span>
-      <div class="flex-1 flex flex-col gap-3">
+        <svg width="14" height="22" viewBox="0 0 16 24" fill="currentColor">
+          <circle cx="5" cy="6" r="2"/><circle cx="11" cy="6" r="2"/>
+          <circle cx="5" cy="12" r="2"/><circle cx="11" cy="12" r="2"/>
+          <circle cx="5" cy="18" r="2"/><circle cx="11" cy="18" r="2"/>
+        </svg>
+      </div>
+
+      <span class="BP-B text-green-bright text-sm mt-3 min-w-[20px]">{{ question.order }}.</span>
+
+      <div class="flex-1 flex flex-col gap-3 min-w-0">
 
         <!-- Текст вопроса -->
         <input
           v-model="question.text"
           type="text"
           placeholder="Текст вопроса"
-          class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright"
+          class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright text-base"
         />
 
         <!-- Тип вопроса -->
         <select
           :value="question.type"
           @change="store.setQuestionType(sectionId, question.id, ($event.target as HTMLSelectElement).value as QuestionType)"
-          class="px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright"
+          class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright text-base"
         >
           <option value="text">Текстовый ответ</option>
           <option value="textarea">Многострочный текст</option>
@@ -40,27 +42,35 @@
         </select>
 
         <!-- Варианты ответов -->
-        <div v-if="question.type === 'single_choice' || question.type === 'multiple_choice' || question.type === 'yes_no'" class="flex flex-col gap-2">
-          <div v-for="option in question.options" :key="option.id" class="flex flex-col gap-2 border-l-4 border-green-light bg-bg-light rounded-r-lg p-3">
+        <div v-if="question.type === 'single_choice' || question.type === 'multiple_choice' || question.type === 'yes_no'"
+          class="flex flex-col gap-2">
+          <div v-for="option in question.options" :key="option.id"
+            class="flex flex-col gap-2 border-l-4 border-green-light bg-bg-light rounded-r-lg p-3">
+
+            <!-- Текст варианта -->
             <div class="flex items-center gap-2">
               <input
                 v-model="option.text"
                 type="text"
                 placeholder="Вариант ответа"
-                class="flex-1 px-3 py-2 bg-white border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright"
+                class="flex-1 min-w-0 px-3 py-2 bg-white border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright text-base"
               />
-              <button @click="store.removeOption(sectionId, question.id, option.id)" class="text-bg-red hover:text-red-900 transition">✕</button>
+              <button @click="store.removeOption(sectionId, question.id, option.id)"
+                class="text-bg-red hover:text-red-900 transition flex-shrink-0">✕</button>
             </div>
-            <div class="flex items-center gap-4 pl-1 flex-wrap">
+
+            <!-- Вес + переход — в колонку на мобилке -->
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 pl-1">
               <div class="flex items-center gap-2">
-                <label class="text-xs G-M text-gray-medium">Вес:</label>
+                <label class="text-xs G-M text-gray-medium whitespace-nowrap">Вес:</label>
                 <input v-model.number="option.weight" type="number"
                   class="w-16 px-2 py-1 bg-white border-b-2 border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright text-sm" />
               </div>
-              <div v-if="question.type === 'single_choice' || question.type === 'yes_no'" class="flex items-center gap-2">
-                <label class="text-xs G-M text-gray-medium">Перейти к вопросу:</label>
+              <div v-if="question.type === 'single_choice' || question.type === 'yes_no'"
+                class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                <label class="text-xs G-M text-gray-medium whitespace-nowrap">Перейти к вопросу:</label>
                 <select v-model="option.next_question_id"
-                  class="px-2 py-1 bg-white border-b-2 border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright text-sm">
+                  class="w-full sm:w-auto px-2 py-1 bg-white border-b-2 border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright text-sm">
                   <option :value="null">Следующий по порядку</option>
                   <option v-for="q in allQuestions" :key="q.id" :value="q.id" :disabled="q.id === question.id">
                     {{ q.order }}. {{ q.text || 'Без названия' }}
@@ -69,13 +79,16 @@
               </div>
             </div>
           </div>
-          <button @click="store.addOption(sectionId, question.id)" class="text-sm G-M text-green-bright hover:text-green-dark transition text-left">
+
+          <button @click="store.addOption(sectionId, question.id)"
+            class="text-sm G-M text-green-bright hover:text-green-dark transition text-left">
             + Добавить вариант
           </button>
         </div>
 
-        <!-- Слайдер / шкала мин-макс -->
-        <div v-if="question.type === 'slider' || question.type === 'rating'" class="flex items-center gap-4">
+        <!-- Слайдер / рейтинг мин-макс -->
+        <div v-if="question.type === 'slider' || question.type === 'rating'"
+          class="flex items-center gap-4">
           <div class="flex items-center gap-2">
             <label class="text-xs G-M text-gray-medium">Мин</label>
             <input v-model.number="question.min" type="number"
@@ -91,7 +104,7 @@
         <!-- Дата подтип -->
         <div v-if="question.type === 'date'">
           <select v-model="question.date_subtype"
-            class="px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright">
+            class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright">
             <option value="date">Дата</option>
             <option value="time">Время</option>
             <option value="datetime">Дата и время</option>
@@ -99,19 +112,22 @@
         </div>
 
         <!-- Score ranges -->
-        <div v-if="question.type === 'slider' || question.type === 'rating' || question.type === 'number'" class="flex flex-col gap-2">
+        <div v-if="question.type === 'slider' || question.type === 'rating' || question.type === 'number'"
+          class="flex flex-col gap-2">
           <label class="text-sm G-M text-gray-medium">Диапазоны весов:</label>
-          <div v-for="(range, index) in question.score_ranges" :key="index" class="flex items-center gap-2 bg-bg-light rounded-lg p-2">
+          <div v-for="(range, index) in question.score_ranges" :key="index"
+            class="flex flex-wrap items-center gap-2 bg-bg-light rounded-lg p-2">
             <span class="text-xs G-M text-gray-medium">от</span>
             <input v-model.number="range.from" type="number"
-              class="w-16 px-2 py-1 bg-white border-b-2 border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright text-sm" />
+              class="w-14 px-2 py-1 bg-white border-b-2 border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright text-sm" />
             <span class="text-xs G-M text-gray-medium">до</span>
             <input v-model.number="range.to" type="number"
-              class="w-16 px-2 py-1 bg-white border-b-2 border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright text-sm" />
+              class="w-14 px-2 py-1 bg-white border-b-2 border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright text-sm" />
             <span class="text-xs G-M text-gray-medium">вес</span>
             <input v-model.number="range.weight" type="number"
-              class="w-16 px-2 py-1 bg-white border-b-2 border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright text-sm" />
-            <button @click="question.score_ranges!.splice(index, 1)" class="text-bg-red hover:text-red-900 transition">✕</button>
+              class="w-14 px-2 py-1 bg-white border-b-2 border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright text-sm" />
+            <button @click="question.score_ranges!.splice(index, 1)"
+              class="text-bg-red hover:text-red-900 transition ml-auto">✕</button>
           </div>
           <button @click="question.score_ranges!.push({ from: 0, to: 0, weight: 0 })"
             class="text-sm G-M text-green-bright hover:text-green-dark transition text-left">
@@ -119,8 +135,8 @@
           </button>
         </div>
 
-        <!-- Чекбоксы -->
-        <div class="flex items-center gap-4">
+        <!-- Чекбоксы — в колонку на мобилке -->
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
           <label class="flex items-center gap-2 cursor-pointer">
             <input v-model="isOptional" type="checkbox" class="w-4 h-4 accent-green-500" />
             <span class="text-sm G-M text-gray-medium">Необязательный вопрос</span>
@@ -133,7 +149,8 @@
       </div>
 
       <!-- Удалить -->
-      <button @click="store.removeQuestion(sectionId, question.id)" class="trash-icon bg-red-400 hover:bg-red-500 rounded w-8 h-8 flex items-center justify-center transition cursor-pointer">
+      <button @click="store.removeQuestion(sectionId, question.id)"
+        class="trash-icon bg-red-400 hover:bg-red-500 rounded w-8 h-8 flex-shrink-0 flex items-center justify-center transition cursor-pointer">
       </button>
     </div>
   </div>
