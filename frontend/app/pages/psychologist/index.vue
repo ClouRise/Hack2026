@@ -138,13 +138,21 @@ const { api } = useApi()
 
 async function handleSave() {
   try {
+    const formData = new FormData()
+    formData.append('bio', about.value)
+    if (authStore.user?.phone) {
+      formData.append('phone', authStore.user.phone)
+    }
+
+    // Если есть файл — добавляем
+    const file = fileInput.value?.files?.[0]
+    if (file) {
+      formData.append('photo', file)
+    }
+
     await api('/users/me', {
       method: 'PATCH',
-      body: {
-        bio: about.value,
-        photo_url: avatar.value,
-        phone: authStore.user?.phone
-      }
+      body: formData
     })
   } catch (e) {
     console.error('Ошибка сохранения:', e)
