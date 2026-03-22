@@ -37,6 +37,11 @@ async def route_import_test(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Отсутствует обязательное поле: {e}",
         )
+    if not user.has_active_access:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Срок доступа истёк или аккаунт заблокирован",
+        )
     return {"test_id": str(test.id), "access_link": test.access_link}
 
 
@@ -47,6 +52,11 @@ async def route_export_test(
     user:    User         = Depends(get_current_psychologist),
 ):
     """отправляет json со всеми полями(в том числе веса)"""
+    if not user.has_active_access:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Срок доступа истёк или аккаунт заблокирован",
+        )
     try:
         data = await export_test(db, test_id)
     except ValueError as e:
@@ -64,6 +74,7 @@ async def route_get_test_for_guest(
     db:          AsyncSession = Depends(get_db),
 ):
     """отправляет json скрывая веса"""
+    
     try:
         data = await get_test_for_guest(db, access_link)
     except ValueError as e:
@@ -145,6 +156,11 @@ async def route_psychologist_report(
     user: User         = Depends(get_current_psychologist),
 ):
     """docx отчет для психолога"""
+    if not user.has_active_access:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Срок доступа истёк или аккаунт заблокирован",
+        )
     try:
         buf = await generate_psychologist_report(db, session_id)
     except ValueError as e:
