@@ -149,9 +149,29 @@ async function fetchSubmissions() {
     console.error('Ошибка загрузки:', e)
   }
 }
-
 async function downloadReport(submissionId: string, format: 'docx' | 'html', type: 'client' | 'psychologist') {
-  // TODO: GET /submissions/{id}/report?format=docx&type=client
-  console.log('Скачать отчёт:', { submissionId, format, type })
+  try {
+    const endpoint = type === 'client'
+      ? `/guest/sessions/${submissionId}/report`
+      : `/psychologist/sessions/${submissionId}/report`
+
+    const baseURL = useRuntimeConfig().public.apiBase as string
+    const response = await fetch(`${baseURL}${endpoint}`, {
+      headers: {
+        Authorization: `Bearer ${authStore.token}`
+      }
+    })
+
+    const blob = await response.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `report_${type}.docx`
+    a.click()
+    URL.revokeObjectURL(url)
+  } catch (e) {
+    console.error('Ошибка скачивания:', e)
+    alert('Ошибка при скачивании отчёта')
+  }
 }
 </script>

@@ -126,7 +126,28 @@ function formatAnswer(value: any) {
 }
 
 async function downloadReport(format: 'docx' | 'html', type: 'client' | 'psychologist') {
-  console.log('Скачать:', { format, type })
-  // TODO: подключить API
+  try {
+    const endpoint = type === 'client'
+      ? `/guest/sessions/${route.params.submissionsId}/report`
+      : `/psychologist/sessions/${route.params.submissionsId}/report`
+
+    const baseURL = useRuntimeConfig().public.apiBase as string
+    const response = await fetch(`${baseURL}${endpoint}`, {
+      headers: {
+        Authorization: `Bearer ${useAuthStore().token}`
+      }
+    })
+    console.log('submissionsId:', route.params.submissionsId)
+    const blob = await response.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `report_${type}.docx`
+    a.click()
+    URL.revokeObjectURL(url)
+  } catch (e) {
+    console.error('Ошибка скачивания:', e)
+    alert('Ошибка при скачивании отчёта')
+  }
 }
 </script>
