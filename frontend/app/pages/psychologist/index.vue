@@ -7,9 +7,9 @@
       <div class="flex items-center gap-6 mb-6">
         <div class="relative">
           <img
-            :src="avatar || '/default-avatar.png'"
-            class="w-24 h-24 rounded-full object-cover border-2 border-green-light"
-          />
+          :src="getAvatarUrl(avatar)"
+          class="w-24 h-24 rounded-full object-cover border-2 border-green-light"
+        />
           <button
             @click="fileInput?.click()"
             class="absolute bottom-0 right-0 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm bg-green-bright hover:bg-green-bright transition"
@@ -69,9 +69,9 @@
   <div v-if="showBusinessCard" class="fixed inset-0 bg-green-dark/70 flex items-center justify-center z-50" @click.self="showBusinessCard = false">
     <div class="bg-white rounded-lg p-8 max-w-sm w-full mx-4 text-center card-test-shadows">
       <img
-        :src="avatar || '/default-avatar.png'"
-        class="w-20 h-20 rounded-full object-cover mx-auto mb-4 border-2 border-green-light"
-      />
+          :src="getAvatarUrl(avatar)"
+          class="w-20 h-20 rounded-full object-cover mx-auto mb-4 border-2 border-green-light"
+        />
       <p class="BP-B text-xl text-green-dark mb-1">{{ authStore.user?.name }}</p>
       <p class="G-M text-gray-medium text-sm mb-4">Психолог</p>
       <div v-html="renderedAbout" class="mb-6 text-left text-green-dark G-M"
@@ -88,7 +88,7 @@ import { marked } from 'marked'
 import RichTextEditor from '~/components/ui/RichTextEditor.vue'
 
 definePageMeta({
-  middleware: []
+  middleware: ['auth']
 })
 
 useHead({
@@ -115,7 +115,7 @@ watch(about, () => {
 
 // QR код через бесплатный API
 const qrCodeUrl = computed(() => {
-  const url = `${window.location.origin}/psychologist/${authStore.user?.id}`
+  const url = `${useRequestURL().origin}/psychologist/${authStore.user?.id}`
   return `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(url)}`
 })
 
@@ -138,21 +138,13 @@ const { api } = useApi()
 
 async function handleSave() {
   try {
-    const formData = new FormData()
-    formData.append('bio', about.value)
-    if (authStore.user?.phone) {
-      formData.append('phone', authStore.user.phone)
-    }
-
-    // Если есть файл — добавляем
-    const file = fileInput.value?.files?.[0]
-    if (file) {
-      formData.append('photo', file)
-    }
-
     await api('/users/me', {
       method: 'PATCH',
-      body: formData
+      body: {
+        bio: about.value,
+        photo_url: avatar.value,
+        phone: authStore.user?.phone
+      }
     })
   } catch (e) {
     console.error('Ошибка сохранения:', e)
@@ -169,6 +161,14 @@ onMounted(async () => {
     console.error('Ошибка загрузки профиля:', e)
   }
 })
+const config = useRuntimeConfig()
+
+function getAvatarUrl(url: string | null) {
+  if (!url) return '/default-avatar.png'
+  if (url.startsWith('http')) return url
+  return `${config.public.apiBase}${url}`
+}
+
 </script>
 
 <style>

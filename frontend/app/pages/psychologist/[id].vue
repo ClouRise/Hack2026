@@ -5,9 +5,9 @@
       <div class="flex items-center gap-6 mb-6">
         <div class="relative">
           <img
-            :src="profile?.photo_url || '/default-avatar.png'"
-            class="w-24 h-24 rounded-full object-cover border-2 border-green-light"
-          />
+                :src="getAvatarUrl(profile?.photo_url)"
+                class="w-24 h-24 rounded-full object-cover border-2 border-green-light"
+            />
         </div>
         <div>
           <p class="BP-B text-lg text-green-dark">{{ profile?.name }}</p>
@@ -66,4 +66,10 @@ onMounted(async () => {
 const renderedAbout = computed(() => {
   return marked(profile.value?.bio ?? '')
 })
+function getAvatarUrl(url: string | null) {
+  if (!url) return '/default-avatar.png'
+  if (url.startsWith('http')) return url
+  return `${config.public.apiBase}${url}`
+}
+
 </script>

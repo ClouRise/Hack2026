@@ -1,6 +1,5 @@
 import uuid
 
-from app.core.email import send_new_psychologist_email
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -141,7 +140,6 @@ async def create_user(
     await db.commit()
     await db.refresh(new_user)
     
-    await send_new_psychologist_email(email=data.email, name=data.name, password=temp_password)
 
     return CreateUserResponse(
         user=UserSchema.model_validate(new_user),
