@@ -47,11 +47,11 @@ services:
     volumes:
      - ./backend/app/media:/app/media
     #  - ./backend:/app  #лишнее
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"] #поменять здесь host
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8000/docs"] #поменять здесь host
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
     ports:
      - 8000:8000   #убрать это в проде
     # depends_on:
@@ -103,8 +103,9 @@ services:
     ports:
       - "80:80"
     depends_on:
-      backend:
-        condition: service_healthy
+      # backend:
+      #   condition: service_healthy
+      - backend
     networks:
       - dev
     
