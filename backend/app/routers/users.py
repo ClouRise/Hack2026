@@ -245,7 +245,7 @@ async def refresh_token_endpoint(
     }
 
 
-@router.get("/psychologists", response_model=list[UserSchema])
+@router.get("/admin", response_model=list[UserSchema])
 async def get_psychologists(
     current_admin: UserModel = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db)

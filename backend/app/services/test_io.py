@@ -140,10 +140,6 @@ async def import_test(
     data:            dict,
     psychologist_id: uuid.UUID,
 ) -> Test:
-    """
-    Разбивает экспортный JSON по таблицам.
-    Все UUID генерируются заново — это новая независимая копия теста.
-    """
 
     # ── Тест ──────────────────────────────────
     test = Test(
@@ -191,6 +187,30 @@ async def import_test(
 
     await db.flush()
 
+    # ── Обновляем next_question_id в опциях ──
+    for old_q_id, new_q_id in question_id_map.items():
+        result = await db.execute(select(Question).where(Question.id == new_q_id))
+        q = result.scalar_one_or_none()
+        if not q or not q.config.get("options"):
+            continue
+
+        needs_update = False
+        updated_options = []
+        for opt in q.config["options"]:
+            opt = opt.copy()
+            if opt.get("next_question_id"):
+                old_next = opt["next_question_id"]
+                new_next = question_id_map.get(old_next)
+                if new_next:
+                    opt["next_question_id"] = str(new_next)
+                    needs_update = True
+            updated_options.append(opt)
+
+        if needs_update:
+            q.config = {**q.config, "options": updated_options}
+
+    await db.flush()
+
     # ── Метрики (формулы) ─────────────────────
     metric_id_map: dict[str, uuid.UUID] = {}
 
@@ -202,9 +222,9 @@ async def import_test(
             id=new_m_id,
             test_id=test.id,
             name=m_data["name"],
-            expression=m_data["operation"],   # обязательное поле — без fallback
+            expression=m_data["operation"],
             ranges=m_data.get("interpretations", []),
-            coefficient=m_data["coefficient"], # обязательное поле — без fallback
+            coefficient=m_data["coefficient"],
         )
         db.add(formula)
         await db.flush()
@@ -323,8 +343,6 @@ async def get_test_for_guest(db: AsyncSession, access_link: str) -> dict:
     for section in sorted(test.sections, key=lambda s: cast(Section, s).order):
         questions_out = []
         for q in sorted(section.questions, key=lambda q: q.order_index):
-            if q.is_hidden:
-                continue
 
             cfg = q.config or {}
             strip_keys = GUEST_STRIP_FIELDS.get(q.type, set())

@@ -2,18 +2,31 @@ import { defineStore } from 'pinia'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = useCookie('token')
-  const user = ref<{ id: number; name: string; role: 'admin' | 'psychologist'; email: string; phone?: string; access_until?: string | null } | null>(null)
+  const user = ref<{
+    id: string
+    name: string
+    role: 'ADMIN' | 'PSYCHOLOGIST'  // бек возвращает uppercase
+    email: string
+    phone?: string
+    access_until?: string | null
+    is_blocked?: boolean
+  } | null>(null)
   const config = useRuntimeConfig()
 
   const isAuthenticated = computed(() => !!token.value)
-  const isAdmin = computed(() => user.value?.role === 'admin')
-  const isPsychologist = computed(() => user.value?.role === 'psychologist')
+  const isAdmin = computed(() => user.value?.role?.toLowerCase() === 'admin')
+  const isPsychologist = computed(() => user.value?.role?.toLowerCase() === 'psychologist')
 
-  async function login(username: string, password: string) {
-    const response = await $fetch<{ access_token: string; role: string }>('/auth/login', {
+  async function login(email: string, password: string) {
+    const formData = new FormData()
+    formData.append('username', email)  // бек ждёт form-data
+    formData.append('password', password)
+
+    const response = await $fetch<{ access_token: string }>('/users/token', {
       baseURL: config.public.apiBase as string,
       method: 'POST',
-      body: { username, password }
+      body: formData,
+      credentials: 'include'  // для cookie refresh_token
     })
 
     token.value = response.access_token
@@ -23,11 +36,11 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function fetchProfile() {
-    user.value = await $fetch<{ id: number; name: string; role: 'admin' | 'psychologist'; email: string; phone?: string; access_until?: string | null }>('/profile', {
-    baseURL: config.public.apiBase as string,
-    headers: { Authorization: `Bearer ${token.value}` }
-  })
-}
+    user.value = await $fetch<typeof user.value>('/users/me', {
+      baseURL: config.public.apiBase as string,
+      headers: { Authorization: `Bearer ${token.value}` }
+    })
+  }
 
   function logout() {
     token.value = null

@@ -36,25 +36,19 @@
             <td class="px-6 py-4 G-M text-gray-medium">{{ psychologist.access_until ?? 'Не ограничен' }}</td>
             <td class="px-6 py-4">
               <span
-                :class="psychologist.is_active ? 'bg-bg-light border-l-[5px] border-green-bright text-green-dark2' : 'border-l-[5px] text-bg-red bg-color-red-user blocked-user'"
+                :class="!psychologist.is_blocked ? 'bg-bg-light border-l-[5px] border-green-bright text-green-dark2' : 'border-l-[5px] text-bg-red bg-color-red-user blocked-user'"
                 class="px-3 py-2 text-xs G-M"
               >
-                {{ psychologist.is_active ? 'Активен' : 'Заблокирован' }}
+                {{ !psychologist.is_blocked ? 'Активен' : 'Заблокирован' }}
               </span>
             </td>
             <td class="px-6 py-4">
               <div class="flex items-center gap-3">
                 <button
-                  @click="openEditModal(psychologist)"
-                  class="text-sm G-M cursor-pointer text-green-600 hover:text-green-800 whitespace-nowrap"
-                >
-                  Редактировать
-                </button>
-                <button
                   @click="toggleBlock(psychologist)"
                   class="text-sm G-M whitespace-nowrap cursor-pointer text-gray-600 hover:text-gray-400"
                 >
-                  {{ psychologist.is_active ? 'Заблокировать' : 'Разблокировать' }}
+                  {{ !psychologist.is_blocked ? 'Заблокировать' : 'Разблокировать' }}
                 </button>
               </div>
             </td>
@@ -84,11 +78,6 @@
             <input v-model="form.phone" type="text" placeholder="+7 999 999 99 99"
               class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright" />
           </div>
-          <div v-if="!showEditModal">
-            <label class="block text-[10pt] G-M text-gray-light mb-1">Пароль</label>
-            <input v-model="form.password" type="password" placeholder="Придумайте пароль"
-              class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright" />
-          </div>
           <div>
             <label class="block text-[10pt] G-M text-gray-light mb-1">Доступ до</label>
             <input v-model="form.access_until" type="date"
@@ -115,44 +104,44 @@ definePageMeta({
   middleware: [],
   layout: "admin"
 })
+
+const { api } = useApi()
+const authStore = useAuthStore()
+
 interface Psychologist {
   id: string
   name: string
   email: string
   phone?: string
   created_at: string
-  access_until: string | null 
-  is_active: boolean
+  access_until: string | null
+  is_blocked: boolean  // бек возвращает is_blocked, не is_active
 }
 
-const psychologists = ref<Psychologist[]>([
-  {
-    id: '1',
-    name: 'Иванова Мария Петровна',
-    email: 'ivanova@example.com',
-    created_at: '2026-01-15T10:00:00',
-    access_until: '2026-12-31',
-    is_active: true
-  },
-  {
-    id: '2',
-    name: 'Петров Алексей Сергеевич',
-    email: 'petrov@example.com',
-    created_at: '2026-02-20T10:00:00',
-    access_until: null,
-    is_active: false
+const psychologists = ref<Psychologist[]>([])
+
+// Загрузка списка
+async function fetchPsychologists() {
+  try {
+    const result = await api('/users/admin') as Psychologist[]
+    console.log('PSYCHOLOGISTS:', result)
+    psychologists.value = result
+  } catch (e) {
+    console.error('Ошибка загрузки:', e)
   }
-])
+}
+
+onMounted(() => fetchPsychologists())
 
 const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const editingId = ref<string | null>(null)
+const tempPassword = ref<string | null>(null)
 
 const form = reactive({
   name: '',
   email: '',
   phone: '',
-  password: '',
   access_until: ''
 })
 
@@ -173,36 +162,52 @@ function closeModals() {
   showCreateModal.value = false
   showEditModal.value = false
   editingId.value = null
-  Object.assign(form, { name: '', email: '', phone: '', password: '', access_until: '' })
+  tempPassword.value = null
+  Object.assign(form, { name: '', email: '', phone: '', access_until: '' })
 }
 
-function toggleBlock(psychologist: Psychologist) {
-  psychologist.is_active = !psychologist.is_active
-  // TODO: подключить API
-}
-
-function handleSubmit() {
-  if (showEditModal.value) {
-    const p = psychologists.value.find(p => p.id === editingId.value)
-    if (p) {
-      p.name = form.name
-      p.email = form.email
-      p.phone = form.phone
-      p.access_until = form.access_until || null
-    }
-  } else {
-    psychologists.value.push({
-      id: crypto.randomUUID(),
-      name: form.name,
-      email: form.email,
-      phone: form.phone,
-      created_at: new Date().toISOString(),
-      access_until: form.access_until || null,
-      is_active: true
-    })
+async function toggleBlock(psychologist: Psychologist) {
+  try {
+    const endpoint = psychologist.is_blocked
+      ? `/users/${psychologist.id}/unblock`
+      : `/users/${psychologist.id}/block`
+    await api(endpoint, { method: 'POST' })
+    psychologist.is_blocked = !psychologist.is_blocked
+  } catch (e) {
+    console.error('Ошибка блокировки:', e)
   }
-  closeModals()
-  // TODO: подключить API
+}
+
+async function handleSubmit() {
+  try {
+    if (showEditModal.value) {
+      closeModals()
+    } else {
+      await api('/users/create', {
+        method: 'POST',
+        body: {
+          name: form.name,
+          email: form.email,
+          phone: form.phone || undefined,
+          access_until: form.access_until || undefined
+        }
+      })
+
+      await fetchPsychologists()
+      closeModals()
+      alert('Психолог создан! Пароль отправлен на почту.')
+    }
+  } catch (e: any) {
+  console.error('Ошибка:', e)
+  const detail = e?.data?.detail
+  
+  if (Array.isArray(detail)) {
+    const messages = detail.map((err: any) => err.msg).join('\n')
+    alert(messages)
+  } else {
+    alert(detail || e?.message || 'Ошибка при создании')
+  }
+}
 }
 </script>
 
