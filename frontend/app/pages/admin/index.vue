@@ -1,16 +1,18 @@
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-3xl BP-B text-green-dark">Психологи</h1>
+    <!-- Шапка -->
+    <div class="mb-6">
+      <h1 class="text-2xl sm:text-3xl BP-B text-green-dark mb-3">Психологи</h1>
       <button
         @click="showCreateModal = true"
-        class="px-6 cursor-pointer py-2 text-white text-xl BP-B rounded bg-green-bright hover:bg-green-bright transition"
+        class="px-4 py-2 cursor-pointer text-white text-sm sm:text-xl BP-B rounded bg-green-bright hover:bg-green-bright transition"
       >
         + Создать психолога
       </button>
     </div>
 
-    <div class="bg-white rounded-lg overflow-hidden card-test-shadows">
+    <!-- ДЕСКТОП (md+): таблица -->
+    <div class="hidden md:block bg-white rounded-lg overflow-hidden card-test-shadows">
       <table class="w-full">
         <thead class="bg-bg-light border-b border-gray-light">
           <tr>
@@ -57,10 +59,57 @@
       </table>
     </div>
 
-    <!-- Модалка -->
-    <div v-if="showCreateModal || showEditModal" class="fixed inset-0 bg-green-dark/70 flex items-center justify-center z-50" @click.self="closeModals">
-      <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4 card-test-shadows">
-        <h2 class="text-xl BP-B text-green-dark mb-6">{{ showEditModal ? 'Редактировать психолога' : 'Создать психолога' }}</h2>
+    <!-- МОБИЛЬНЫЙ + ПЛАНШЕТ (< md): карточки -->
+    <div class="md:hidden flex flex-col gap-3">
+      <div v-for="psychologist in psychologists" :key="psychologist.id"
+        class="bg-white rounded-lg p-3 card-test-shadows flex flex-col gap-3">
+
+        <!-- Имя + статус -->
+        <div class="flex items-start justify-between gap-2">
+          <p class="BP-B text-base text-green-dark leading-[1.2]">{{ psychologist.name }}</p>
+          <span
+            :class="!psychologist.is_blocked ? 'bg-bg-light border-l-[5px] border-green-bright text-green-dark2' : 'border-l-[5px] text-bg-red bg-color-red-user blocked-user'"
+            class="flex-shrink-0 px-2 py-1 text-xs G-M"
+          >
+            {{ !psychologist.is_blocked ? 'Активен' : 'Заблокирован' }}
+          </span>
+        </div>
+
+        <!-- Детали -->
+        <div class="flex flex-col gap-1">
+          <p class="text-xs G-M text-gray-medium truncate">{{ psychologist.email }}</p>
+          <div class="flex items-center gap-3">
+            <p class="text-xs G-M text-gray-medium">
+              Рег: {{ formatDate(psychologist.created_at) }}
+            </p>
+            <p class="text-xs G-M text-gray-medium">
+              Доступ: {{ psychologist.access_until ?? 'Не ограничен' }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Действия -->
+        <div class="flex items-center gap-3 border-t border-bg-light pt-2">
+          <button @click="openEditModal(psychologist)"
+            class="text-xs G-M cursor-pointer text-green-600 hover:text-green-800">
+            Редактировать
+          </button>
+          <button @click="toggleBlock(psychologist)"
+            class="text-xs G-M cursor-pointer text-gray-600 hover:text-gray-400">
+            {{ !psychologist.is_blocked ? 'Заблокировать' : 'Разблокировать' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модалка — без изменений, уже адаптивная через max-w-md mx-4 -->
+    <div v-if="showCreateModal || showEditModal"
+      class="fixed inset-0 bg-green-dark/70 flex items-center justify-center z-50"
+      @click.self="closeModals">
+      <div class="bg-white rounded-xl p-5 sm:p-6 w-full max-w-md mx-4 card-test-shadows">
+        <h2 class="text-xl BP-B text-green-dark mb-6">
+          {{ showEditModal ? 'Редактировать психолога' : 'Создать психолога' }}
+        </h2>
 
         <div class="flex flex-col gap-4">
           <div>
@@ -87,15 +136,17 @@
           <div>
             <label class="block text-[10pt] G-M text-gray-light mb-1">Доступ до</label>
             <input v-model="form.access_until" type="date"
-              class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright" />
+              class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright text-base" />
           </div>
         </div>
 
         <div class="flex gap-3 mt-6">
-          <button @click="closeModals" class="flex-1 px-4 py-2 border-2 border-gray-light text-gray-medium G-M rounded hover:border-green-dark hover:text-green-dark transition">
+          <button @click="closeModals"
+            class="flex-1 px-4 py-2 border-2 border-gray-light text-gray-medium G-M rounded hover:border-green-dark hover:text-green-dark transition">
             Отмена
           </button>
-          <button @click="handleSubmit" class="flex-1 px-4 py-2 bg-green-bright text-white BP-B rounded hover:bg-green-dark transition">
+          <button @click="handleSubmit"
+            class="flex-1 px-4 py-2 bg-green-bright text-white BP-B rounded hover:bg-green-dark transition">
             {{ showEditModal ? 'Сохранить' : 'Создать' }}
           </button>
         </div>

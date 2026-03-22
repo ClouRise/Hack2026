@@ -202,3 +202,15 @@ async def get_current_psychologist(
         )
     
     return current_user
+
+
+async def get_current_active_psychologist(
+    current_user: UserModel = Depends(get_current_psychologist)
+) -> UserModel:
+    """проверяет что психолог не заблокирован и срок доступа не истёк."""
+    if not current_user.has_active_access:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Срок доступа истёк или аккаунт заблокирован",
+        )
+    return current_user

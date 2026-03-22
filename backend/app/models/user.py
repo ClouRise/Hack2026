@@ -87,6 +87,10 @@ class User(Base):
         default=lambda: datetime.now(timezone.utc)
     )
 
+    access_until: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
 
     # Связи
     tests: Mapped[list["Test"]] = relationship(
@@ -115,7 +119,7 @@ class User(Base):
     
     @property
     def has_active_access(self) -> bool:
-        """Проверка активности доступа"""
+        """проверка активности доступа"""
         if self.is_blocked:
             return False
         if self.access_until is None:
