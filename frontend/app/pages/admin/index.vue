@@ -153,6 +153,22 @@
       </div>
     </div>
   </div>
+    <div v-if="showPasswordModal" class="fixed inset-0 bg-green-dark/70 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 w-full max-w-sm mx-4 card-test-shadows text-center">
+      <h2 class="text-xl BP-B text-green-dark mb-2">Психолог создан!</h2>
+      <p class="G-M text-sm text-gray-medium mb-4">Временный пароль для входа:</p>
+      <div class="bg-bg-light border-l-[5px] border-green-bright px-4 py-3 mb-4">
+        <p class="text-2xl BP-B text-green-dark tracking-widest">{{ createdPassword }}</p>
+      </div>
+      <p class="text-xs G-M text-rose-400 mb-6">Сохраните пароль — больше он не будет показан!</p>
+      <button
+        @click="() => { showPasswordModal = false; createdPassword = null }"
+        class="w-full px-4 py-2 bg-green-bright text-white BP-B rounded hover:bg-green-dark transition"
+      >
+        Понятно
+      </button>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -270,6 +286,8 @@ function validate() {
   return valid
 }
 
+const createdPassword = ref<string | null>(null)
+const showPasswordModal = ref(false)
 
 async function handleSubmit() {
   if (!validate()) return
@@ -278,7 +296,7 @@ async function handleSubmit() {
     if (showEditModal.value) {
       closeModals()
     } else {
-      await api('/users/create', {
+      const response = await api('/users/create', {
         method: 'POST',
         body: {
           name: form.name,
@@ -286,16 +304,18 @@ async function handleSubmit() {
           phone: form.phone || undefined,
           access_until: form.access_until || undefined
         }
-      })
+      }) as any
 
       await fetchPsychologists()
       closeModals()
-      alert('Психолог создан! Пароль отправлен на почту.')
+      createdPassword.value = response.temp_password
+      showPasswordModal.value = true
     }
   } catch (e: any) {
+    
     console.error('Ошибка:', e)
+    console.log('Детали ошибки:', JSON.stringify(e?.data))
 
-    // Ошибки с бека — подсвечиваем нужное поле
     const detail = e?.data?.detail
     if (typeof detail === 'string') {
       if (detail.toLowerCase().includes('email')) {
