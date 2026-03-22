@@ -1,5 +1,5 @@
 import uuid
-
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -13,6 +13,7 @@ from app.auth import (
     create_access_token,
     create_refresh_token,
     verify_refresh_token,
+    get_current_active_psychologist,
 )
 
 from app.schemas.users import (
@@ -30,7 +31,6 @@ router = APIRouter(
     prefix="/users",
     tags=["Пользователи"],
 )
-
 async def _get_login_credentials(request: Request) -> tuple[str, str]:
     content_type = request.headers.get("content-type", "").lower()
 
@@ -152,12 +152,12 @@ async def login(
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
-    if user.is_blocked:
+    if not user.has_active_access:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Account is blocked"
+            detail="Срок доступа истёк или аккаунт заблокирован",
         )
+    
     
     access_token = create_access_token(data={"sub": user.email, "id": str(user.id)})
     
@@ -219,7 +219,11 @@ async def refresh_token_endpoint(
             detail="Invalid or expired refresh token",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+    if not user.has_active_access:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Срок доступа истёк или аккаунт заблокирован",
+        )
     new_access_token = create_access_token(
         data={"sub": user.email, "id": str(user.id)}
     )

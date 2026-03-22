@@ -209,7 +209,6 @@ async def import_test(
                     opt["next_question_id"] = str(new_next)
                     needs_update = True
             updated_options.append(opt)
-
         if needs_update:
             q.config = {**q.config, "options": updated_options}
 
