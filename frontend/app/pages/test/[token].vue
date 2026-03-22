@@ -115,25 +115,36 @@
       </p>
     </div>
 
-    <div v-if="downloadReport" class="flex flex-col items-center">
-      <div class="image-done-test"></div>
-      <h1 class="text-4xl BP-B text-green-dark2 leading-[0.9] mb-6">Тест пройден!</h1>
-      <p class="G-M text-gray-medium leading-[1.1] text-sm text-left mb-4">
-        Спасибо за прохождение теста! Психолог в скором времени пришлет результаты вам на почту.
-        А пока можете ознакомиться с <span class="underline G-Bold">предварительным</span> результатом от ИИ:
-      </p>
-      <div class="w-full bg-bg-light border-l-[5px] border-green-dark2 p-4 mb-6">
-        <p class="BP-M text-sm text-gray-main leading-[0.9]">
-          На основе ваших ответов не было выявлено выраженных индикаторов, характерных для острых клинических состояний, требующих немедленного вмешательства. Показатели находятся в диапазоне, который часто связывают с нормативными колебаниями психоэмоционального фона (адаптационная усталость, ситуативный стресс.<br/><br/>
-          <span class="font-bold">Важно помнить:</span> Данный тест не является медицинским диагнозом. Он отражает ваше состояние только в момент прохождения.<br/><br/>
-          <span class="font-bold">Рекомендация:</span> Для поддержания эмоционального баланса мы рекомендуем обратить внимание на режим сна и физической активности. Если вы замечаете, что усталость накапливается, консультация психолога (даже профилактическая) поможет подобрать инструменты для восстановления.
-        </p>
-      </div>
-      <button @click=""
-        class="bg-green-bright hover:bg-green-bright mt-8 w-full px-4 py-2 text-white rounded hover:bg-green-600 text-xl BP-B">
-        Скачать результат
-      </button>
-    </div>
+<div v-if="downloadReport" class="flex flex-col items-center">
+  <div class="image-done-test"></div>
+  <h1 class="text-4xl BP-B text-green-dark2 leading-[0.9] mb-6">Тест пройден!</h1>
+  <p class="G-M text-gray-medium leading-[1.1] text-sm text-left mb-4">
+    Спасибо за прохождение теста! Психолог в скором времени пришлет результаты вам на почту.
+    А пока можете ознакомиться с <span class="underline G-Bold">предварительным</span> результатом от ИИ:
+  </p>
+
+  <!-- Загрузка -->
+  <div v-if="aiLoading"
+    class="w-full bg-bg-light border-l-[5px] border-green-dark2 p-4 mb-6 flex items-center gap-3">
+    <svg class="animate-spin w-4 h-4 text-green-dark2 flex-shrink-0"
+      xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+    </svg>
+    <p class="BP-M text-sm text-gray-medium">Анализируем ваши ответы...</p>
+  </div>
+
+  <!-- Ответ AI -->
+  <div v-else class="w-full bg-bg-light border-l-[5px] border-green-dark2 p-4 mb-6">
+    <p class="BP-M text-sm text-gray-main leading-[1.4] whitespace-pre-line">{{ aiResult }}</p>
+  </div>
+
+  <button @click=""
+    class="bg-green-bright hover:bg-green-bright mt-8 w-full px-4 py-2 text-white rounded hover:bg-green-600 text-xl BP-B">
+    Скачать результат
+  </button>
+</div>
+
   </div>
   </template>
 
@@ -177,6 +188,8 @@
   const isCanTouchContinue = ref(false)
   const firstTouchButton = ref(false)
   const isTest = ref(false)
+  const aiResult = ref<string>('')
+const aiLoading = ref(false)
 
   const visibleQuestions = ref<Set<string>>(new Set())
 
@@ -393,6 +406,29 @@
     isCanTouchContinueTest.value = true
     isTest.value = false
     downloadReport.value = true
+    aiLoading.value = true
+try {
+  const answersForAI = flatQuestions.value
+    .filter((q: any) => visibleQuestions.value.has(q.id))
+    .map((q: any) => {
+      const val = form.value[q.id]
+      const formatted = Array.isArray(val) ? val.join(', ') : String(val ?? '')
+      return `${q.text}: ${formatted}`
+    })
+
+  const aiResponse = await $fetch<{ result: string }>('/chat/', {
+    baseURL: config.public.apiBase as string,
+    method: 'POST',
+    body: { answers: answersForAI }
+  })
+
+  aiResult.value = aiResponse.result
+} catch (e) {
+  console.error('Ошибка AI:', e)
+  aiResult.value = 'Не удалось получить предварительный результат.'
+} finally {
+  aiLoading.value = false
+}
   } catch (e) {
     console.error('Ошибка отправки:', e)
     alert('Ошибка при отправке ответов')
