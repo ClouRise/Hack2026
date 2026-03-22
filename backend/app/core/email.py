@@ -28,8 +28,7 @@ async def send_new_psychologist_email(email: str, name: str, password: str):
     <p>Здравствуйте, {name}!</p>
     <p>Для вас создан аккаунт психолога.</p>
     <p><strong>Email:</strong> {email}<br>
-    <strong>Временный пароль:</strong> {password}</p>
-    <p>Войдите на сайт и смените пароль.</p>
+    <strong>Пароль для входа:</strong> {password}</p>
     """
     
     message = MessageSchema(
