@@ -133,8 +133,7 @@
       </div>
 
       <!-- Удалить -->
-      <button @click="store.removeQuestion(sectionId, question.id)" class="text-bg-red hover:text-red-900 transition mt-1 text-lg">
-        🗑
+      <button @click="store.removeQuestion(sectionId, question.id)" class="trash-icon bg-red-400 hover:bg-red-500 rounded w-8 h-8 flex items-center justify-center transition cursor-pointer">
       </button>
     </div>
   </div>

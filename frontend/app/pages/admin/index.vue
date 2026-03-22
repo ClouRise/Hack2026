@@ -36,7 +36,7 @@
             <td class="px-6 py-4 G-M text-gray-medium">{{ psychologist.access_until ?? 'Не ограничен' }}</td>
             <td class="px-6 py-4">
               <span
-                :class="psychologist.is_active ? 'bg-bg-light border-l-[5px] border-green-bright text-green-dark2' : 'border-l-[5px] blocked-user'"
+                :class="psychologist.is_active ? 'bg-bg-light border-l-[5px] border-green-bright text-green-dark2' : 'border-l-[5px] text-bg-red bg-color-red-user blocked-user'"
                 class="px-3 py-2 text-xs G-M"
               >
                 {{ psychologist.is_active ? 'Активен' : 'Заблокирован' }}
@@ -52,7 +52,7 @@
                 </button>
                 <button
                   @click="toggleBlock(psychologist)"
-                  class="text-sm G-M whitespace-nowrap cursor-pointer text-gray-600 hover:text-gray-800"
+                  class="text-sm G-M whitespace-nowrap cursor-pointer text-gray-600 hover:text-gray-400"
                 >
                   {{ psychologist.is_active ? 'Заблокировать' : 'Разблокировать' }}
                 </button>
@@ -65,7 +65,7 @@
 
     <!-- Модалка -->
     <div v-if="showCreateModal || showEditModal" class="fixed inset-0 bg-green-dark/70 flex items-center justify-center z-50" @click.self="closeModals">
-      <div class="bg-white rounded-2xl p-6 w-full max-w-md mx-4" style="box-shadow: 0 4px 32px rgba(20,66,16,0.15);">
+      <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4 card-test-shadows">
         <h2 class="text-xl BP-B text-green-dark mb-6">{{ showEditModal ? 'Редактировать психолога' : 'Создать психолога' }}</h2>
 
         <div class="flex flex-col gap-4">
@@ -110,10 +110,11 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({
-  middleware: []
-})
 
+definePageMeta({
+  middleware: [],
+  layout: "admin"
+})
 interface Psychologist {
   id: string
   name: string
@@ -207,7 +208,6 @@ function handleSubmit() {
 
 <style lang="css" scoped>
 .blocked-user{
-  background-color: #EEDBDB;
   border-color: #754444;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-4xl mx-auto">
+  <div class="max-w-4xl ">
     <!-- Мета-информация -->
     <div class="bg-white rounded-2xl p-6 mb-4 card-test-shadows">
       <h2 class="text-xl BP-B text-green-dark mb-4">Основная информация</h2>
@@ -91,7 +91,7 @@
 </VueDraggable>
 
   <button @click="store.addQuestion(section.id)"
-    class="mt-4 w-full border-2 border-dashed border-green-light rounded-lg py-3 G-M hover:border-green-bright hover:text-green-bright transition">
+    class="mt-4 w-full border-2 border-dashed border-green-light text-green-dark rounded-lg py-3 G-M hover:border-green-bright hover:text-green-bright transition">
     + Добавить вопрос
   </button>
 </div>
