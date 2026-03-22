@@ -3,7 +3,11 @@
     <div class="h-full overflow-y-auto">
       <div class="flex items-center justify-center p-4 min-h-full">
         <div class="bg-white rounded-lg w-[440px] card-test-shadows my-4">
-          <div class="p-6">
+          <div class="p-6 relative">
+            <button @click="toggleTheme"
+              class="bg-white px-4 py-2 fixed right-[15px] top-[15px] cursor-pointer rounded-md transition-colors toggle-theme"
+              :class="isDarkTheme ? 'sun white-shadow' : 'moon dark-shadow'">
+            </button>
             <slot />
           </div>
         </div>
@@ -11,6 +15,22 @@
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { useThemeStore } from '~/stores/theme'
+import { storeToRefs } from 'pinia'
+
+const themeStore = useThemeStore()
+
+const { currentTheme, isLightTheme, isDarkTheme } = storeToRefs(themeStore)
+const { toggleTheme } = themeStore
+
+watch(currentTheme, (newTheme) => {
+  if (process.client) {
+    document.body.className = newTheme
+  }
+}, { immediate: true })
+</script>
 
 <style lang="css" scoped>
 /* .bg-test-page {
@@ -37,5 +57,11 @@
 .my-4 {
   margin-top: 1rem;
   margin-bottom: 1rem;
+}
+.dark-shadow{
+  box-shadow: 0 0 20px 0 #0000002b;
+}
+.white-shadow{
+  box-shadow: 0 0 20px 0 #ffffff2b;
 }
 </style>

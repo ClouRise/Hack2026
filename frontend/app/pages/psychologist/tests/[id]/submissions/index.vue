@@ -25,31 +25,31 @@
             :key="submission.id"
             class="border-b border-bg-light hover:bg-bg-light transition"
           >
-            <td class="px-6 py-4 BP-M text-green-dark">{{ submission.client_name }}</td>
+            <td class="px-6 py-4 BP-M text-green-dark text-lg">{{ submission.client_name }}</td>
             <td class="px-6 py-4 G-M text-gray-medium">{{ formatDate(submission.created_at) }}</td>
             <td class="px-6 py-4">
               <div class="flex items-center gap-3 flex-wrap">
                 <NuxtLink
                   :to="`/psychologist/tests/${route.params.id}/submissions/${submission.id}`"
-                  class="text-sm G-M text-green-bright hover:text-green-dark transition"
+                  class="text-sm cursor-pointer G-M text-green-bright hover:text-green-dark transition"
                 >
                   Смотреть результат
                 </NuxtLink>
                 <button
                   @click="downloadReport(submission.id, 'docx', 'client')"
-                  class="text-sm G-M text-gray-medium hover:text-green-dark transition"
+                  class="text-sm cursor-pointer G-M text-gray-medium hover:text-green-dark transition"
                 >
                   DOCX клиент
                 </button>
                 <button
                   @click="downloadReport(submission.id, 'docx', 'psychologist')"
-                  class="text-sm G-M text-gray-medium hover:text-green-dark transition"
+                  class="text-sm G-M cursor-pointer text-gray-medium hover:text-green-dark transition"
                 >
                   DOCX психолог
                 </button>
                 <button
                   @click="downloadReport(submission.id, 'html', 'client')"
-                  class="text-sm G-M text-gray-medium hover:text-green-dark transition"
+                  class="text-sm G-M cursor-pointer text-gray-medium hover:text-green-dark transition"
                 >
                   HTML
                 </button>
@@ -62,7 +62,7 @@
 
     <button
       @click="fetchSubmissions"
-      class="px-4 py-2 border-2 border-gray-light text-gray-medium G-M rounded hover:border-green-dark hover:text-green-dark transition"
+      class="px-4 py-2 border-2 border-gray-light bg-white text-gray-medium G-M rounded hover:border-green-dark hover:text-green-dark transition"
     >
       Обновить
     </button>

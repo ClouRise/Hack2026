@@ -20,6 +20,7 @@
   --color-green-bright-hover: #5ddc65;
   --color-edit-hover: #62a871;
   --color-trash-hover: #ef4444;
+  --color-red-block: #EEDBDB;
 
   /* border цвета */
   --border-green-light: #8ed993;
@@ -70,6 +71,7 @@
   --color-bg-light: #272727;
   --color-bg-red: #a54a4a;
   --color-white: #1d1d1d;
+  --color-red-block: #2d2626;
 
   /* hover состояния для bg */
   --color-green-bright-hover: #6edf78;
@@ -242,6 +244,10 @@ h3 { font-size: 1.17em; font-weight: bold; }
 }
 .hover\:text-gray-light:hover {
   color: var(--color-gray-light);
+}
+
+.bg-color-red-user {
+  background-color: var(--color-red-block);
 }
 
 .bg-teal-dark {
@@ -654,8 +660,8 @@ input[type="checkbox"]:checked::after {
 
 .card-test-shadows {
   box-shadow: 
-    22px 22px 30px 0px rgba(7, 98, 104, 0.8),
-    -22px -22px 30px 0px rgba(29, 208, 103, 0.3);
+    15px 15px 20px 0px rgba(7, 98, 104, 0.6),
+    -15px -15px 20px 0px rgba(29, 208, 103, 0.2);
 }
 
 .bg-opacity-darken {

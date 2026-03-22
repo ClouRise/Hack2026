@@ -8,8 +8,7 @@
         placeholder="Название метрики (например: Уровень тревожности)"
         class="flex-1 px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright"
       />
-      <button @click="store.removeMetric(metric.id)" class="text-bg-red hover:text-red-900 transition ml-2 text-lg">
-        🗑
+      <button @click="store.removeMetric(metric.id)" class="trash-icon bg-red-400 hover:bg-red-500 rounded w-8 h-8 flex items-center justify-center transition cursor-pointer">
       </button>
     </div>
 

@@ -7,19 +7,19 @@
 
     <!-- Кнопки отчётов -->
     <div class="flex gap-3 mb-6 flex-wrap">
-      <button @click="downloadReport('docx', 'client')" class="px-6 py-2 bg-green-bright text-white BP-B rounded hover:bg-green-dark transition">
+      <button @click="downloadReport('docx', 'client')" class="px-6 text-xl py-2 cursor-pointer bg-green-bright text-white BP-B rounded hover:bg-green-dark transition">
         Скачать DOCX (клиент)
       </button>
-      <button @click="downloadReport('docx', 'psychologist')" class="px-6 py-2 bg-green-bright text-white BP-B rounded hover:bg-green-dark transition">
+      <button @click="downloadReport('docx', 'psychologist')" class="px-6 text-xl cursor-pointer py-2 bg-green-bright text-white BP-B rounded hover:bg-green-dark transition">
         Скачать DOCX (психолог)
       </button>
-      <button @click="downloadReport('html', 'client')" class="px-6 py-2 border-2 border-gray-light text-gray-medium G-M rounded hover:border-green-dark hover:text-green-dark transition">
+      <button @click="downloadReport('html', 'client')" class="px-6 bg-white py-2 cursor-pointer border-2 border-gray-light text-gray-medium G-M rounded hover:border-green-dark hover:text-green-dark transition">
         Открыть HTML отчёт
       </button>
     </div>
 
     <!-- Данные клиента -->
-    <div class="bg-white rounded-2xl p-6 mb-4" style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
+    <div class="bg-white rounded-2xl p-6 mb-7 card-test-shadows">
       <h2 class="text-xl BP-B text-green-dark mb-4">Данные клиента</h2>
       <div class="flex flex-col gap-3">
         <div class="flex gap-4">
@@ -38,15 +38,15 @@
     </div>
 
     <!-- Метрики -->
-    <div class="bg-white rounded-2xl p-6 mb-4" style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
+    <div class="bg-white rounded-2xl p-6 mb-7 card-test-shadows">
       <h2 class="text-xl BP-B text-green-dark mb-4">Результаты метрик</h2>
       <div class="flex flex-col gap-4">
-        <div v-for="metric in submission.metrics" :key="metric.name" class="border border-gray-light rounded-xl p-4">
+        <div v-for="metric in submission.metrics" :key="metric.name" class="border rounded-md border-gray-light p-4">
           <div class="flex items-center justify-between mb-2">
             <span class="BP-M text-green-dark">{{ metric.name }}</span>
             <span class="text-2xl BP-B text-green-bright">{{ metric.value }}</span>
           </div>
-          <div v-if="metric.interpretation" class="bg-bg-light rounded-lg p-3 border-l-4 border-green-bright">
+          <div v-if="metric.interpretation" class="bg-bg-light p-3 border-l-4 border-green-bright">
             <p class="text-sm G-M text-green-dark">{{ metric.interpretation.label }}</p>
             <p class="text-sm G-Book text-gray-medium mt-1">{{ metric.interpretation.description }}</p>
           </div>
@@ -55,7 +55,7 @@
     </div>
 
     <!-- Ответы клиента -->
-    <div class="bg-white rounded-2xl p-6 mb-4" style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
+    <div class="bg-white rounded-2xl p-6 mb-7 card-test-shadows">
       <h2 class="text-xl BP-B text-green-dark mb-4">Ответы на вопросы</h2>
       <div class="flex flex-col gap-4">
         <div v-for="answer in submission.answers" :key="answer.question_id" class="border-b border-bg-light pb-4">

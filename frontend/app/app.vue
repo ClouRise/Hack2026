@@ -1,27 +1,16 @@
 <template>
   <NuxtLayout :class="isDarkTheme ? 'dark-theme bg-dark' : 'light-theme bg-light'">
-    <button @click="toggleTheme" class="bg-white px-4 py-2 fixed top-[70px] right-[15px] cursor-pointer rounded-md transition-colors toggle-theme"
-      :class="isDarkTheme ? 'sun' : 'moon'">
-      
-    </button>
     <NuxtPage />
   </NuxtLayout>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useThemeStore } from '~/stores/theme'
 import { storeToRefs } from 'pinia'
 
 const themeStore = useThemeStore()
 
 const { currentTheme, isLightTheme, isDarkTheme } = storeToRefs(themeStore)
-const { toggleTheme } = themeStore
-
-watch(currentTheme, (newTheme) => {
-  if (process.client) {
-    document.body.className = newTheme
-  }
-}, { immediate: true })
 </script>
 
 <style>
@@ -58,8 +47,8 @@ watch(currentTheme, (newTheme) => {
 .toggle-theme{
   background-size: 70%;
   background-position: center;
-  width: 50px;
-  height: 50px;
+  width: 46px;
+  height: 46px;
   background-repeat: no-repeat;
   border: 2px solid var(--color-bg-light);
 }
