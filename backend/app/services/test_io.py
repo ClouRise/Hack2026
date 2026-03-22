@@ -6,15 +6,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert
 from sqlalchemy.orm import selectinload
 
-from app.models import (
-    Test, Section, Question, Formula, Session, Answer, question_metrics
-)
+from app.models import Test, Section, Question, Formula, Session, Answer, question_metrics
 from app.models.question import QuestionType
+from app.models.formula import Formula as FormulaModel
 
 
-# ══════════════════════════════════════════════
+# ====================================
 # МАППИНГ ТИПОВ
-# ══════════════════════════════════════════════
+# ====================================
 
 FRONTEND_TO_DB_TYPE: dict[str, QuestionType] = {
     "single_choice":   QuestionType.SINGLE,
@@ -23,6 +22,7 @@ FRONTEND_TO_DB_TYPE: dict[str, QuestionType] = {
     "text":            QuestionType.TEXT,
     "textarea":        QuestionType.TEXTAREA,
     "yesno":           QuestionType.YESNO,
+    "yes_no":          QuestionType.YESNO,
     "number":          QuestionType.NUMBER,
     "date":            QuestionType.DATE,
     "time":            QuestionType.TIME,
@@ -30,10 +30,19 @@ FRONTEND_TO_DB_TYPE: dict[str, QuestionType] = {
 }
 
 DB_TO_FRONTEND_TYPE: dict[QuestionType, str] = {
-    v: k for k, v in FRONTEND_TO_DB_TYPE.items()
+    QuestionType.SINGLE:   "single_choice",
+    QuestionType.MULTIPLE: "multiple_choice",
+    QuestionType.RANGE:    "slider",
+    QuestionType.TEXT:     "text",
+    QuestionType.TEXTAREA: "textarea",
+    QuestionType.YESNO:    "yes_no",
+    QuestionType.NUMBER:   "number",
+    QuestionType.DATE:     "date",
+    QuestionType.TIME:     "time",
+    QuestionType.RATING:   "rating",
 }
 
-# Поля которые НЕ отдаём гостю — срезаем по типу вопроса
+# какие ключи срезать из опций перед отдачей гостю
 GUEST_STRIP_FIELDS: dict[QuestionType, set[str]] = {
     QuestionType.SINGLE:   {"weight"},
     QuestionType.MULTIPLE: {"weight"},
@@ -41,7 +50,7 @@ GUEST_STRIP_FIELDS: dict[QuestionType, set[str]] = {
     QuestionType.RANGE:    {"score_ranges"},
 }
 
-# Поля config которые выносятся в корень вопроса для экспортного JSON
+# какие поля из config выносить в корень JSON 
 CONFIG_ROOT_FIELDS: dict[QuestionType, list[str]] = {
     QuestionType.SINGLE:   ["options", "score_ranges"],
     QuestionType.MULTIPLE: ["options", "score_ranges"],
@@ -53,11 +62,12 @@ CONFIG_ROOT_FIELDS: dict[QuestionType, list[str]] = {
     QuestionType.TEXTAREA: ["placeholder"],
 }
 
-# Поля которые идут в config при импорте — берём только то что есть в данных
+# какие поля из JSON вопроса сохранять в config JSONB при импорте.
 CONFIG_SOURCE_FIELDS: dict[str, list[str]] = {
     "single_choice":   ["options"],
     "multiple_choice": ["options"],
     "yesno":           ["options"],
+    "yes_no":          ["options"],
     "slider":          ["min", "max", "step", "labels", "score_ranges"],
     "number":          ["min", "max", "step"],
     "rating":          ["min", "max"],
@@ -65,16 +75,12 @@ CONFIG_SOURCE_FIELDS: dict[str, list[str]] = {
     "textarea":        ["placeholder"],
 }
 
-
-# ══════════════════════════════════════════════
-# ХЕЛПЕРЫ ДЛЯ CONFIG
-# ══════════════════════════════════════════════
+# ====================================
+# ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+# ====================================
 
 def build_question_config(q_data: dict) -> dict:
-    """
-    Собирает JSONB config из плоских полей вопроса.
-    Включает только те поля которые реально пришли в данных — без дефолтов.
-    """
+    """собирает JSONB config из полей вопроса."""
     fields = CONFIG_SOURCE_FIELDS.get(q_data["type"], [])
     return {
         field: q_data[field]
@@ -84,10 +90,7 @@ def build_question_config(q_data: dict) -> dict:
 
 
 def expand_question_config(config: dict, db_type: QuestionType) -> dict:
-    """
-    Разворачивает JSONB config в плоские поля для экспортного JSON.
-    Включает только те поля которые есть в config — без дефолтов.
-    """
+    """разворачивает JSONB config в поля для экспорта"""
     fields = CONFIG_ROOT_FIELDS.get(db_type, [])
     return {
         field: config[field]
@@ -97,7 +100,7 @@ def expand_question_config(config: dict, db_type: QuestionType) -> dict:
 
 
 def strip_sensitive_from_options(options: list, strip_keys: set) -> list:
-    """Убирает указанные ключи из каждой опции."""
+    """убирает веса из словарей"""
     return [
         {k: v for k, v in opt.items() if k not in strip_keys}
         for opt in options
@@ -105,14 +108,11 @@ def strip_sensitive_from_options(options: list, strip_keys: set) -> list:
 
 
 def remap_report_template(
-    template: dict,
+    template:        dict,
     question_id_map: dict[str, uuid.UUID],
     metric_id_map:   dict[str, uuid.UUID],
 ) -> dict:
-    """
-    Заменяет старые UUID в report_template на новые.
-    Нужно после импорта — все объекты получили свежие id.
-    """
+    """Заменяет старые UUID в report_template на новые после импорта."""
     def remap_block(block: dict) -> dict:
         b = block.copy()
         if b.get("metric_id"):
@@ -131,9 +131,9 @@ def remap_report_template(
     }
 
 
-# ══════════════════════════════════════════════
-# 1. ИМПОРТ: JSON → БД
-# ══════════════════════════════════════════════
+# =====================================
+# ИМПОРТ: JSON в БД
+# =====================================
 
 async def import_test(
     db:              AsyncSession,
@@ -141,11 +141,12 @@ async def import_test(
     psychologist_id: uuid.UUID,
 ) -> Test:
     """
-    Разбивает экспортный JSON по таблицам.
-    Все UUID генерируются заново — это новая независимая копия теста.
+    разбивает экспортный JSON по таблицам
+    все UUID генерируются заново — по сути копия теста.
+    next_question_id в опциях обновляется на новые UUID
     """
 
-    # ── Тест ──────────────────────────────────
+    #Тест
     test = Test(
         id=uuid.uuid4(),
         psychologist_id=psychologist_id,
@@ -159,7 +160,7 @@ async def import_test(
     db.add(test)
     await db.flush()
 
-    # ── Секции + вопросы ──────────────────────
+    #Секции + вопросы 
     question_id_map: dict[str, uuid.UUID] = {}
 
     for section_data in data.get("sections", []):
@@ -191,7 +192,30 @@ async def import_test(
 
     await db.flush()
 
-    # ── Метрики (формулы) ─────────────────────
+    #next_question_id
+    for old_q_id, new_q_id in question_id_map.items():
+        result = await db.execute(select(Question).where(Question.id == new_q_id))
+        q = result.scalar_one_or_none()
+        if not q or not q.config.get("options"):
+            continue
+
+        needs_update = False
+        updated_options = []
+        for opt in q.config["options"]:
+            opt = opt.copy()
+            if opt.get("next_question_id"):
+                new_next = question_id_map.get(opt["next_question_id"])
+                if new_next:
+                    opt["next_question_id"] = str(new_next)
+                    needs_update = True
+            updated_options.append(opt)
+
+        if needs_update:
+            q.config = {**q.config, "options": updated_options}
+
+    await db.flush()
+
+    #метрики
     metric_id_map: dict[str, uuid.UUID] = {}
 
     for m_data in data.get("metrics", []):
@@ -202,9 +226,9 @@ async def import_test(
             id=new_m_id,
             test_id=test.id,
             name=m_data["name"],
-            expression=m_data["operation"],   # обязательное поле — без fallback
+            expression=m_data["operation"],
             ranges=m_data.get("interpretations", []),
-            coefficient=m_data["coefficient"], # обязательное поле — без fallback
+            coefficient=m_data["coefficient"],
         )
         db.add(formula)
         await db.flush()
@@ -219,7 +243,7 @@ async def import_test(
                     )
                 )
 
-    # ── Перезаписываем UUID в report_template ─
+    #перезаписываем UUID в report_template
     test.report_template = remap_report_template(
         data.get("report_template", {"client": [], "psychologist": []}),
         question_id_map,
@@ -231,12 +255,12 @@ async def import_test(
     return test
 
 
-# ══════════════════════════════════════════════
-# 2. ЭКСПОРТ: БД → JSON
-# ══════════════════════════════════════════════
+# =====================================
+# ЭКСПОРТ: БД в JSON
+# =====================================
 
 async def export_test(db: AsyncSession, test_id: uuid.UUID) -> dict:
-    """Собирает полный экспортный JSON из БД."""
+    """собирает полный JSON из БД"""
 
     result = await db.execute(
         select(Test)
@@ -295,14 +319,13 @@ async def export_test(db: AsyncSession, test_id: uuid.UUID) -> dict:
     }
 
 
-# ══════════════════════════════════════════════
-# 3. ПОЛУЧЕНИЕ ТЕСТА ДЛЯ ГОСТЯ
-# ══════════════════════════════════════════════
+# =====================================
+# ПОЛУЧЕНИЕ ТЕСТА ДЛЯ ГОСТЯ
+# =====================================
 
 async def get_test_for_guest(db: AsyncSession, access_link: str) -> dict:
     """
-    Возвращает тест без весов и score_ranges.
-    Скрытые вопросы не включаются.
+    возвращает тест без весов и score_ranges.
     """
     result = await db.execute(
         select(Test)
@@ -323,64 +346,57 @@ async def get_test_for_guest(db: AsyncSession, access_link: str) -> dict:
     for section in sorted(test.sections, key=lambda s: cast(Section, s).order):
         questions_out = []
         for q in sorted(section.questions, key=lambda q: q.order_index):
-            if q.is_hidden:
-                continue
-
             cfg = q.config or {}
             strip_keys = GUEST_STRIP_FIELDS.get(q.type, set())
-
-            # Берём поля из config — только те что есть, без дефолтов
             expanded = expand_question_config(cfg, q.type)
 
-            # Если у типа есть опции — срезаем чувствительные ключи
             if "options" in expanded and strip_keys:
                 expanded["options"] = strip_sensitive_from_options(
                     expanded["options"], strip_keys
                 )
 
-            # score_ranges гостю не нужны — убираем если попали через expand
             expanded.pop("score_ranges", None)
 
             questions_out.append({
-                "id":                str(q.id),
-                "order":             q.order_index,
-                "text":              q.text,
-                "type":              DB_TO_FRONTEND_TYPE.get(q.type, q.type.value),
-                "required":          q.is_required,
+                "id": str(q.id),
+                "order": q.order_index,
+                "text": q.text,
+                "type": DB_TO_FRONTEND_TYPE.get(q.type, q.type.value),
+                "required": q.is_required,
                 "hidden_by_default": q.is_hidden,
                 **expanded,
             })
 
         sections_out.append({
-            "id":        str(section.id),
-            "order":     section.order,
-            "title":     section.title,
+            "id": str(section.id),
+            "order": section.order,
+            "title": section.title,
             "questions": questions_out,
         })
 
     return {
-        "test_id":       str(test.id),
-        "title":         test.title,
-        "description":   test.description,
+        "test_id": str(test.id),
+        "title": test.title,
+        "description": test.description,
         "client_fields": test.required_fields,
-        "sections":      sections_out,
+        "sections": sections_out,
     }
 
 
 # ══════════════════════════════════════════════
-# 4. СОХРАНЕНИЕ ОТВЕТОВ СЕССИИ
+# СОХРАНЕНИЕ ОТВЕТОВ СЕССИИ
 # ══════════════════════════════════════════════
 
 def resolve_answer_weight(answer_value, question: Question) -> Optional[float]:
     """
-    Вычисляет вес ответа на основе config вопроса.
-    Возвращает None для типов без весовой логики.
+    вычисляет вес ответа на основе конфига вопроса
+    возвращает None для типов без весов
     """
     cfg = question.config or {}
 
     if question.type in (QuestionType.SINGLE, QuestionType.YESNO):
         for opt in cfg.get("options", []):
-            if opt["id"] == answer_value:
+            if opt["id"] == answer_value or opt.get("text") == answer_value:
                 return float(opt["weight"]) if "weight" in opt else None
 
     if question.type == QuestionType.MULTIPLE:
@@ -388,22 +404,24 @@ def resolve_answer_weight(answer_value, question: Question) -> Optional[float]:
         weights = [
             float(opt["weight"])
             for opt in cfg.get("options", [])
-            if opt["id"] in selected and "weight" in opt
+            if (opt["id"] in selected or opt.get("text") in selected) and "weight" in opt
         ]
         return sum(weights) if weights else None
 
     if question.type == QuestionType.RANGE:
-        val = float(answer_value)
+        if isinstance(answer_value, dict):
+            val = (float(answer_value.get("min", 0)) + float(answer_value.get("max", 0))) / 2
+        else:
+            val = float(answer_value)
         for sr in cfg.get("score_ranges", []):
             if sr["from"] <= val <= sr["to"]:
                 return float(sr["weight"]) if "weight" in sr else None
-        # score_ranges не заданы — вес не определён
         return None
 
     if question.type in (QuestionType.NUMBER, QuestionType.RATING):
         return float(answer_value)
 
-    return None  # TEXT, TEXTAREA, DATE, TIME — без веса
+    return None
 
 
 async def save_session_answers(
@@ -411,9 +429,7 @@ async def save_session_answers(
     session_id: uuid.UUID,
     data:       dict,
 ) -> None:
-    """
-    Принимает answers JSON от фронта, считает weight и пишет в таблицу answers.
-    """
+    """принимает JSON с ответами от фронта и считает веса и пишет в таблицу answers"""
     session_result = await db.execute(
         select(Session).where(Session.id == session_id)
     )
@@ -453,3 +469,80 @@ async def save_session_answers(
         }
 
     await db.commit()
+
+
+# =====================================
+# ПОДСЧЁТ МЕТРИК
+# =====================================
+
+def find_interpretation(value: float, ranges: list) -> str | None:
+    """по числовому значению находит подходящий диапазон и возвращает его описание"""
+    for r in ranges:
+        if r["from"] <= value <= r["to"]:
+            return r.get("description")
+    return None
+
+
+def apply_operation(expression: str, weights: list[float], coefficient: float) -> float:
+    """применяет операцию к списку весов и умножает на коэффициент"""
+    if not weights:
+        return 0.0
+
+    match expression:
+        case "sum":     result = sum(weights)
+        case "avg":     result = sum(weights) / len(weights)
+        case "min":     result = min(weights)
+        case "max":     result = max(weights)
+        case "percent": result = (sum(weights) / len(weights)) * 100
+        case _:         result = sum(weights)
+
+    return result * coefficient
+
+
+async def calculate_and_save_metrics(
+    db:         AsyncSession,
+    session_id: uuid.UUID,
+) -> dict:
+    """
+    считает метрики по всем формулам теста и сохраняет в session.metrics
+    """
+    result = await db.execute(
+        select(Session)
+        .where(Session.id == session_id)
+        .options(
+            selectinload(Session.test).selectinload(Test.formula).selectinload(FormulaModel.questions),
+            selectinload(Session.answers),
+        )
+    )
+    session: Optional[Session] = result.scalar_one_or_none()
+    if not session:
+        raise ValueError(f"Сессия {session_id} не найдена")
+
+    weights_by_question: dict[uuid.UUID, float] = {
+        a.question_id: a.weight
+        for a in session.answers
+        if a.weight is not None
+    }
+
+    metrics: dict = {}
+
+    for formula in session.test.formula:
+        weights = [
+            weights_by_question[q.id]
+            for q in formula.questions
+            if q.id in weights_by_question
+        ]
+
+        value = apply_operation(formula.expression, weights, formula.coefficient)
+        interpretation = find_interpretation(value, formula.ranges or [])
+
+        metrics[str(formula.id)] = {
+            "name":           formula.name,
+            "value":          value,
+            "interpretation": interpretation,
+        }
+
+    session.metrics = metrics
+    await db.commit()
+
+    return metrics
