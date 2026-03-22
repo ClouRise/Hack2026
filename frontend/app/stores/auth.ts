@@ -29,6 +29,7 @@ export const useAuthStore = defineStore('auth', () => {
       credentials: 'include'  // для cookie refresh_token
     })
 
+    console.log('API URL:', config.public.apiBase)
     token.value = response.access_token
     await fetchProfile()
 
@@ -47,6 +48,11 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
     navigateTo('/login')
   }
+
+  if (token.value) {
+    fetchProfile()
+  }
+  
 
   return { token, user, isAuthenticated, isAdmin, isPsychologist, login, fetchProfile, logout }
 })

@@ -23,8 +23,6 @@
           <tr>
             <th class="text-left px-6 py-3 leading-[1.1] w-48 text-lg G-M text-gray-medium">Название</th>
             <th class="text-left px-6 py-3 leading-[1.1] w-32 text-sm G-M text-gray-medium">Прошли</th>
-            <th class="text-left px-6 py-3 leading-[1.1] w-48 text-sm G-M text-gray-medium">Последнее заполнение</th>
-            <th class="text-left px-6 py-3 leading-[1.1] text-sm G-M text-gray-medium">Статус</th>
             <th class="text-left px-6 py-3 leading-[1.1] text-sm G-M text-gray-medium">Действия</th>
           </tr>
         </thead>
@@ -39,15 +37,6 @@
               <p class="BP-B leading-[1.1] text-lg text-green-dark">{{ test.title }}</p>
             </td>
             <td class="px-6 py-4 G-M text-gray-medium">{{ test.submissions_count }}</td>
-            <td class="px-6 py-4 G-M text-gray-medium">{{ test.last_submission_at ? formatDate(test.last_submission_at)
-              : '—' }}</td>
-            <td class="px-6 py-4">
-              <span
-                :class="test.status === 'published' ? 'bg-bg-light border-l-[5px] border-green-bright text-green-dark2' : 'bg-bg-light border-l-[5px] border-gray-light text-gray-medium'"
-                class="px-3 py-2 text-xs G-M">
-                {{ test.status === 'published' ? 'Опубликован' : 'Черновик' }}
-              </span>
-            </td>
             <td class="px-6 py-4">
               <div class="flex items-center justify-between gap-4">
                 <!-- Левая часть - текстовые ссылки -->
@@ -89,39 +78,34 @@ definePageMeta({
   middleware: []
 })
 
-const authStore = useAuthStore()
-const fileInput = ref<HTMLInputElement | null>(null)
-
-
 interface Test {
   id: string
   title: string
-  status: 'draft' | 'published'
   submissions_count: number
-  last_submission_at: string | null
   token: string | null
 }
 
-// Моковые данные пока бэк не готов
-const tests = ref<Test[]>([
-  {
-    id: '1',
-    title: 'Тест на профориентацию',
-    status: 'published',
-    submissions_count: 12,
-    last_submission_at: '2026-03-20T10:00:00',
+const authStore = useAuthStore()
+const fileInput = ref<HTMLInputElement | null>(null)
+const tests = ref<Test[]>([])
+  const { api } = useApi()
 
-    token: 'abc123'
-  },
-  {
-    id: '2',
-    title: 'Тест на тревожность',
-    status: 'draft',
-    submissions_count: 0,
-    last_submission_at: null,
-    token: null
+  onMounted(async () => {
+  await authStore.fetchProfile()
+  
+  try {
+    const result = await api(`/users/my_tests/${authStore.user?.id}`) as any
+    tests.value = result.мои_опросники.map((t: any) => ({
+      id: t.id,
+      title: t.название,
+      submissions_count: t.прошли,
+      token: t.ссылка ?? null
+    }))
+  } catch (e) {
+    console.error('Ошибка загрузки тестов:', e)
   }
-])
+})
+
 
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString('ru-RU')

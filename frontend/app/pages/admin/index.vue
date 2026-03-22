@@ -66,17 +66,23 @@
           <div>
             <label class="block text-[10pt] G-M text-gray-light mb-1">ФИО</label>
             <input v-model="form.name" type="text" placeholder="Иванов Иван Иванович"
-              class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright" />
+              :class="errors.name ? 'border-rose-400' : 'border-gray-light'"
+              class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] text-green-dark G-M focus:outline-none focus:border-green-bright" />
+            <p v-if="errors.name" class="text-rose-400 text-[9pt] G-M mt-1">{{ errors.name }}</p>
           </div>
           <div>
             <label class="block text-[10pt] G-M text-gray-light mb-1">Email</label>
             <input v-model="form.email" type="email" placeholder="ivan@example.com"
-              class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright" />
+              :class="errors.email ? 'border-rose-400' : 'border-gray-light'"
+              class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] text-green-dark G-M focus:outline-none focus:border-green-bright" />
+            <p v-if="errors.email" class="text-rose-400 text-[9pt] G-M mt-1">{{ errors.email }}</p>
           </div>
           <div>
             <label class="block text-[10pt] G-M text-gray-light mb-1">Телефон</label>
             <input v-model="form.phone" type="text" placeholder="+7 999 999 99 99"
-              class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright" />
+              :class="errors.phone ? 'border-rose-400' : 'border-gray-light'"
+              class="w-full px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] text-green-dark G-M focus:outline-none focus:border-green-bright" />
+            <p v-if="errors.phone" class="text-rose-400 text-[9pt] G-M mt-1">{{ errors.phone }}</p>
           </div>
           <div>
             <label class="block text-[10pt] G-M text-gray-light mb-1">Доступ до</label>
@@ -164,6 +170,7 @@ function closeModals() {
   editingId.value = null
   tempPassword.value = null
   Object.assign(form, { name: '', email: '', phone: '', access_until: '' })
+  Object.assign(errors, { name: '', email: '', phone: '' })
 }
 
 async function toggleBlock(psychologist: Psychologist) {
@@ -178,7 +185,44 @@ async function toggleBlock(psychologist: Psychologist) {
   }
 }
 
+const errors = reactive({
+  name: '',
+  email: '',
+  phone: ''
+})
+
+function validate() {
+  errors.name = ''
+  errors.email = ''
+  errors.phone = ''
+
+  let valid = true
+
+  if (!form.name.trim()) {
+    errors.name = 'Заполните ФИО'
+    valid = false
+  }
+
+  if (!form.email.trim()) {
+    errors.email = 'Заполните email'
+    valid = false
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+    errors.email = 'Некорректный email'
+    valid = false
+  }
+
+  if (form.phone && !/^\+?[0-9\s\-()]{7,20}$/.test(form.phone)) {
+    errors.phone = 'Некорректный номер телефона'
+    valid = false
+  }
+
+  return valid
+}
+
+
 async function handleSubmit() {
+  if (!validate()) return
+
   try {
     if (showEditModal.value) {
       closeModals()
@@ -198,17 +242,22 @@ async function handleSubmit() {
       alert('Психолог создан! Пароль отправлен на почту.')
     }
   } catch (e: any) {
-  console.error('Ошибка:', e)
-  const detail = e?.data?.detail
-  
-  if (Array.isArray(detail)) {
-    const messages = detail.map((err: any) => err.msg).join('\n')
-    alert(messages)
-  } else {
-    alert(detail || e?.message || 'Ошибка при создании')
+    console.error('Ошибка:', e)
+
+    // Ошибки с бека — подсвечиваем нужное поле
+    const detail = e?.data?.detail
+    if (typeof detail === 'string') {
+      if (detail.toLowerCase().includes('email')) {
+        errors.email = detail
+      } else {
+        errors.name = detail
+      }
+    } else {
+      errors.name = 'Ошибка при создании, попробуйте снова'
+    }
   }
 }
-}
+
 </script>
 
 <style lang="css" scoped>

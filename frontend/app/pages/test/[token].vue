@@ -92,7 +92,7 @@
             <p class="G-Bold text-gray-main text-[11pt] mb-2">Ответ: {{ question.type == "rating" ? form[question.id] : '' }}</p>
 
             <QuestionInput v-model="form[question.id]" :type="question.type"
-              :options="question.options.map((opt:any) => opt.text)" :min="question.min" :max="question.max" />
+              :options="question.options?.map((opt:any) => opt.text) ?? []" :min="question.min" :max="question.max" />
 
             <div v-if="question.type === 'rating'" class="flex justify-between text-[10pt] text-gray-medium G-M mt-1">
               <span>{{ question.min }}</span>

@@ -12,11 +12,7 @@
           <button @click="handleExport"
             class="px-4 py-2 bg-white border-2 border-gray-light G-M text-gray-medium rounded hover:border-green-dark hover:text-green-dark transition">
             Экспорт JSON
-          </button>
-          <button @click="handleSave('draft')"
-            class="px-4 py-2 bg-white border-2 border-gray-light G-M text-gray-medium rounded hover:border-green-dark hover:text-green-dark transition">
-            Сохранить черновик
-          </button>
+          </button>         
           <button @click="handleSave('published')"
             class="px-6 text-lg py-2 bg-green-bright hover:bg-green-dark text-white BP-B rounded transition">
             Опубликовать
@@ -193,10 +189,22 @@ function handleExport() {
   a.click()
   URL.revokeObjectURL(url)
 }
+const { api } = useApi()
 
 async function handleSave(status: 'draft' | 'published') {
-  const payload = store.buildPayload()
-  console.log('Сохраняем:', { ...payload, status })
+  try {
+    const payload = store.buildPayload()
+    const result = await api('/tests/import', {
+      method: 'POST',
+      body: payload
+    }) as any
+    console.log('Тест сохранён:', result)
+    alert('Тест сохранён!')
+    navigateTo('/psychologist/tests')
+  } catch (e) {
+    console.error('Ошибка сохранения:', e)
+    alert('Ошибка при сохранении теста')
+  }
 }
 
 function cloneMetricBlock(metric: { id: string; name: string }): ReportBlock {

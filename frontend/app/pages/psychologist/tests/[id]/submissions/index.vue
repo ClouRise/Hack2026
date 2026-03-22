@@ -82,18 +82,37 @@ interface Submission {
   created_at: string
 }
 
-const testTitle = ref('Тест на профориентацию')
-const submissions = ref<Submission[]>([
-  { id: '1', client_name: 'Иванов Иван', created_at: '2026-03-20T10:00:00' },
-  { id: '2', client_name: 'Петрова Мария', created_at: '2026-03-21T12:00:00' }
-])
+const testTitle = ref('')
+const submissions = ref<Submission[]>([])
 
 function formatDate(date: string) {
   return new Date(date).toLocaleString('ru-RU')
 }
 
+const { api } = useApi()
+const authStore = useAuthStore()
+
+onMounted(async () => {
+  await authStore.fetchProfile()
+  await fetchSubmissions()
+})
+
 async function fetchSubmissions() {
-  // TODO: GET /tests/{id}/submissions
+  try {
+    const result = await api(`/users/my_tests/${authStore.user?.id}`) as any
+    const test = result.мои_опросники.find((t: any) => t.id === route.params.id)
+    
+    if (test) {
+      testTitle.value = test.название
+      submissions.value = test.список_прошедших.map((s: any) => ({
+        id: s.id_session,
+        client_name: s.фио,
+        created_at: s.дата_заполнения ?? new Date().toISOString()
+      }))
+    }
+  } catch (e) {
+    console.error('Ошибка загрузки:', e)
+  }
 }
 
 async function downloadReport(submissionId: string, format: 'docx' | 'html', type: 'client' | 'psychologist') {

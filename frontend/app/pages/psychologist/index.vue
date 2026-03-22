@@ -104,6 +104,15 @@ const avatar = ref<string | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 const showBusinessCard = ref(false)
 
+let saveTimeout: ReturnType<typeof setTimeout> | null = null
+
+watch(about, () => {
+  if (saveTimeout) clearTimeout(saveTimeout)
+  saveTimeout = setTimeout(() => {
+    handleSave()
+  }, 1000)
+})
+
 // QR код через бесплатный API
 const qrCodeUrl = computed(() => {
   const url = `${window.location.origin}/psychologist/${authStore.user?.id}`
@@ -125,11 +134,33 @@ function handleAvatarChange(event: Event) {
   reader.readAsDataURL(file)
 }
 
+const { api } = useApi()
+
 async function handleSave() {
-  console.log('Сохраняем профиль:', { about: about.value, avatar: avatar.value })
-  // TODO: подключить API
-  alert('Профиль сохранён!')
+  try {
+    await api('/users/me', {
+      method: 'PATCH',
+      body: {
+        bio: about.value,
+        photo_url: avatar.value,
+        phone: authStore.user?.phone
+      }
+    })
+  } catch (e) {
+    console.error('Ошибка сохранения:', e)
+    alert('Ошибка при сохранении')
+  }
 }
+
+onMounted(async () => {
+  try {
+    const profile = await api('/users/me') as any
+    about.value = profile.bio ?? ''
+    avatar.value = profile.photo_url ?? null
+  } catch (e) {
+    console.error('Ошибка загрузки профиля:', e)
+  }
+})
 </script>
 
 <style>
