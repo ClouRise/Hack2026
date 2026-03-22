@@ -49,11 +49,11 @@ class Settings(BaseSettings):
     BOOTSTRAP_ADMIN_PASSWORD: str = "admin"
 
     #mail
-    MAIL_USERNAME: str = "dmitri.yanakov@gmail.com"
-    MAIL_PASSWORD: SecretStr = SecretStr("")
-    MAIL_FROM: str = "noreply@profdna.com"
-    MAIL_SERVER: str = "smtp.gmail.com"
-    MAIL_PORT: int = 587
+    # MAIL_USERNAME: str = "dmitri.yanakov@gmail.com"
+    # MAIL_PASSWORD: SecretStr = SecretStr("123")
+    # MAIL_FROM: str = "noreply@profdna.com"
+    # MAIL_SERVER: str = "smtp.gmail.com"
+    # MAIL_PORT: int = 587
 
     # Database
     DATABASE_URL: str | None = None
