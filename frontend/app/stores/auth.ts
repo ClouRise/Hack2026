@@ -43,11 +43,21 @@ export const useAuthStore = defineStore('auth', () => {
     })
   }
 
-  function logout() {
+  async function logout() {
+  try {
+    await $fetch('/users/logout', {
+      baseURL: config.public.apiBase as string,
+      method: 'POST',
+      credentials: 'include'
+    })
+  } catch (e) {
+    console.error('Ошибка logout:', e)
+  } finally {
     token.value = null
     user.value = null
     navigateTo('/login')
   }
+}
 
   if (token.value) {
     fetchProfile()

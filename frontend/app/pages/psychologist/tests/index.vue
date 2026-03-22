@@ -54,9 +54,6 @@
                   </NuxtLink>
                 </div>
                 <div class="flex items-center gap-2">
-                  <NuxtLink :to="`/psychologist/tests/${test.id}/edit`"
-                    class="edit-icon bg-gray-light rounded w-8 h-8 flex items-center justify-center hover:bg-gray-200 transition">
-                  </NuxtLink>
                   <button @click="exportTest(test)"
                     class="export-icon bg-gray-light rounded w-8 h-8 flex items-center justify-center hover:bg-gray-200 transition cursor-pointer">
                   </button>
@@ -103,14 +100,8 @@
 
           <!-- Иконки -->
           <div class="flex items-center gap-1 ml-auto flex-shrink-0">
-            <NuxtLink :to="`/psychologist/tests/${test.id}/edit`"
-              class="edit-icon bg-gray-light rounded w-8 h-8 flex items-center justify-center hover:bg-gray-200 transition">
-            </NuxtLink>
             <button @click="exportTest(test)"
               class="export-icon bg-gray-light rounded w-8 h-8 flex items-center justify-center hover:bg-gray-200 transition cursor-pointer">
-            </button>
-            <button @click="deleteTest(test.id)"
-              class="trash-icon bg-red-400 hover:bg-red-500 rounded w-8 h-8 flex items-center justify-center transition cursor-pointer">
             </button>
           </div>
         </div>
@@ -124,7 +115,7 @@
 
 <script setup lang="ts">
 definePageMeta({
-  middleware: []
+  middleware: ['auth']
 })
 
 interface Test {

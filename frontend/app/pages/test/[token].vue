@@ -139,7 +139,7 @@
     <p class="BP-M text-sm text-gray-main leading-[1.4] whitespace-pre-line">{{ aiResult }}</p>
   </div>
 
-  <button @click=""
+  <button @click="downloadGuestReport"
     class="bg-green-bright hover:bg-green-bright mt-8 w-full px-4 py-2 text-white rounded hover:bg-green-600 text-xl BP-B">
     Скачать результат
   </button>
@@ -368,8 +368,12 @@ const aiLoading = ref(false)
     return allFilled
   }
 
+  const currentSessionId = ref<string | null>(null)
+
+
   const checkFormTest = async () => {
   firstTouchButtonEndTest.value = true
+  
 
   if (!checkRequiredQuestions()) {
     return
@@ -391,6 +395,7 @@ const aiLoading = ref(false)
         }
       }
     })
+    currentSessionId.value = result.session_id
 
 
     // 2. Сразу отправляем ответы с полученным session_id
@@ -494,6 +499,19 @@ try {
 
     return { answers, guest_info }
   }
+
+  async function downloadGuestReport() {
+  if (!currentSessionId.value) return
+  const baseURL = config.public.apiBase as string
+  const response = await fetch(`${baseURL}/guest/sessions/${currentSessionId.value}/report`)
+  const blob = await response.blob()
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `report.docx`
+  a.click()
+  URL.revokeObjectURL(url)
+}
 
   // const dynamicFields = ref([
   //   { label: "Ваш возраст: ", type: "number_select" },

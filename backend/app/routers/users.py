@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi.security import OAuth2PasswordRequestForm
+import hashlib
 from app.auth import (
     hash_password,
     generate_password,
@@ -34,6 +35,7 @@ from app.core.config import settings
 from app.models.test import Test
 from app.models.sessions import Session
 from app.models.answers import Answer
+from app.models.refresh_token import Token
 
 
 router = APIRouter(
@@ -262,6 +264,37 @@ async def get_my_tests(
         "мои_опросники": my_tests
     }
 
+@router.post("/logout")
+async def logout(
+    response: Response,
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
+    """Выход из системы"""
+    
+    
+    refresh_token = request.cookies.get("refresh_token")
+    
+    if refresh_token:
+        
+        token_hash = hashlib.sha256(refresh_token.encode()).hexdigest()
+        
+        # Ищем в БД
+        result = await db.execute(
+            select(Token).where(Token.token_hash == token_hash)
+        )
+        token_obj = result.scalar_one_or_none()
+        
+       
+        if token_obj:
+            await db.delete(token_obj)
+            await db.commit()
+    
+    
+    response.delete_cookie("refresh_token")
+    
+    return {"message": "Успешный выход"}
+
 @router.get("/sessions/{session_id}/answers")
 async def get_session_answers(
     session_id: uuid.UUID,
@@ -297,6 +330,27 @@ async def get_session_answers(
             }
             for answer in session.answers
         ]
+    }
+
+@router.get("/{user_id}/profile")
+async def get_user_public_profile(
+    user_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db)
+):
+    """Публичный профиль психолога (без авторизации)"""
+    
+    user = await db.get(UserModel, user_id)
+    
+    if not user:
+        raise HTTPException(404, "Пользователь не найден")
+    
+    return {
+        "id": str(user.id),
+        "name": user.name,
+        "email": user.email,
+        "phone": user.phone,
+        "photo_url": user.photo_url,
+        "bio": user.bio
     }
 
 
