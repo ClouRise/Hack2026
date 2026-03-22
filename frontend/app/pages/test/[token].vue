@@ -149,7 +149,7 @@ const themeStore = useThemeStore()
 const { currentTheme, isLightTheme, isDarkTheme } = storeToRefs(themeStore)
 
 const testData = ref({
-  "title": "ветвление тест",
+  "title": "Тест на выявление уровня агрессии",
   "description": "олватплоы выалп вылт аивылт вл  лвы лв",
   "show_report_to_client": false,
   "client_fields": [],
@@ -167,20 +167,20 @@ const testData = ref({
           "id": "4fd9c7a3-4c8d-4069-b734-8290d1b603fa",
           "section_id": "8d1d476c-b2c1-4850-a7ef-0cb20bfa32bf",
           "order": 1,
-          "text": "Это вопрос 1",
+          "text": "Нравятся ли вам игры в жанре 'шутер'?",
           "type": "single_choice",
           "required": true,
           "hidden_by_default": false,
           "options": [
             {
               "id": "a66a0963-ff3d-43fb-84a9-183532bf789a",
-              "text": "ко 2 вопросу",
+              "text": "Да",
               "weight": 0,
               "next_question_id": "8595a568-985a-4346-b01b-6de16453e47d"
             },
             {
               "id": "030f17c9-c39b-43ca-b022-00f5e5d6e656",
-              "text": "к 3 вопросу",
+              "text": "Нет",
               "weight": 0,
               "next_question_id": "abe1b74d-5269-40a2-9485-8241a4f5fc5c"
             }
@@ -191,25 +191,25 @@ const testData = ref({
           "id": "8595a568-985a-4346-b01b-6de16453e47d",
           "section_id": "8d1d476c-b2c1-4850-a7ef-0cb20bfa32bf",
           "order": 2,
-          "text": "Это вопрос 2",
-          "type": "single_choice",
+          "text": "Оцените средний уровень своего состояния под конец дня",
+          "type": "rating",
           "required": true,
           "hidden_by_default": true,
-          "options": [
+          "options": [],
+          "score_ranges": [
             {
-              "id": "78afb3bd-8de3-4283-b739-6d9e46a39655",
-              "text": "к 3 вопросу",
-              "weight": 0,
-              "next_question_id": "abe1b74d-5269-40a2-9485-8241a4f5fc5c"
+              "from": 1,
+              "to": 2,
+              "weight": 10
             },
             {
-              "id": "88080a7c-be0f-46e4-987c-c3ab54cf9b78",
-              "text": "в конец",
-              "weight": 0,
-              "next_question_id": "47c2cfbc-5087-4f02-93e7-5da832b970ca"
+              "from": 3,
+              "to": 6,
+              "weight": 0.5
             }
           ],
-          "score_ranges": []
+          "min": 1,
+          "max": 10
         },
         {
           "id": "abe1b74d-5269-40a2-9485-8241a4f5fc5c",
@@ -239,7 +239,7 @@ const testData = ref({
           "id": "47c2cfbc-5087-4f02-93e7-5da832b970ca",
           "section_id": "8d1d476c-b2c1-4850-a7ef-0cb20bfa32bf",
           "order": 4,
-          "text": "Конец теста",
+          "text": "Напишите ваши увлечения (кратко)",
           "type": "text",
           "required": true,
           "hidden_by_default": false,

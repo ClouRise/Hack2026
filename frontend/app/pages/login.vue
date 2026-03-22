@@ -1,35 +1,42 @@
 <template>
-  <div class="min-h-screen bg-gray-100 flex items-center justify-center">
-    <div class="bg-white rounded-2xl shadow-md p-8 w-full max-w-md">
-      <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">ПрофДНК</h1>
+  <div class="min-h-screen bg-gray-100 flex items-center justify-center" :class="isDarkTheme ? 'dark-theme bg-dark' : 'light-theme bg-light'">
+    <div class="bg-white rounded-2xl shadow-md p-8 w-full max-w-md card-test-shadows">
+            <button @click="toggleTheme"
+              class="bg-white px-4 py-2 fixed right-[15px] top-[15px] cursor-pointer rounded-md transition-colors toggle-theme"
+              :class="isDarkTheme ? 'sun white-shadow' : 'moon dark-shadow'">
+            </button>
+      <div class="text-2xl font-bold text-gray-800 mb-6 text-center text-green-dark">
+        <img style="clip-path: inset(0 80% 0 0)" class="w-[200px] h-[40px] absolute" src="https://titan-it.pro/wp-content/uploads/2025/03/logo.svg" alt="">
+        <img class="w-[200px] h-[40px]" style="clip-path: inset(0 0 0 20%)" :style="isDarkTheme ? '' : 'filter: invert(1);'" src="https://titan-it.pro/wp-content/uploads/2025/03/logo.svg" alt="">
+      </div>
 
-      <div class="flex flex-col gap-4">
+      <div class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Логин</label>
+          <label class="block text-[10pt] text-gray-light G-M mb-1">Логин</label>
           <input
             v-model="form.username"
             type="text"
             placeholder="Введите логин"
-            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full px-3 py-2 text-green-dark bg-bg-light border-l-[5px] border-b-[2px] border-gray-light focus:outline-none focus:border-green-bright G-M"
           />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Пароль</label>
+          <label class="block text-[10pt] text-gray-light G-M mb-1">Пароль</label>
           <input
             v-model="form.password"
             type="password"
             placeholder="Введите пароль"
-            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full px-3 py-2 text-green-dark bg-bg-light border-l-[5px] border-b-[2px] border-gray-light focus:outline-none focus:border-green-bright G-M"
           />
         </div>
 
-        <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
+        <p v-if="error" class="text-rose-400 text-sm text-center">{{ error }}</p>
 
         <button
           @click="handleLogin"
           :disabled="loading"
-          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition disabled:opacity-50"
+          class="bg-green-bright hover:bg-green-bright w-full px-4 py-2 text-white rounded hover:bg-green-600 text-xl BP-B transition disabled:opacity-50"
         >
           {{ loading ? 'Входим...' : 'Войти' }}
         </button>
@@ -40,6 +47,13 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '../stores/auth'
+import { useThemeStore } from '~/stores/theme'
+import { storeToRefs } from 'pinia'
+
+const themeStore = useThemeStore()
+
+const { currentTheme, isLightTheme, isDarkTheme } = storeToRefs(themeStore)
+const { toggleTheme } = themeStore
 
 definePageMeta({
   layout: false // не используем default layout
@@ -75,3 +89,12 @@ async function handleLogin() {
   }
 }
 </script>
+
+<style lang="css" scoped>
+.dark-shadow{
+  box-shadow: 0 0 20px 0 #0000002b;
+}
+.white-shadow{
+  box-shadow: 0 0 20px 0 #ffffff2b;
+}
+</style>
