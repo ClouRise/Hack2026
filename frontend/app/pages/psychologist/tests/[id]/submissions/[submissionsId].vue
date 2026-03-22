@@ -1,50 +1,61 @@
 <template>
   <div class="max-w-4xl mx-auto">
-    <div class="flex items-center gap-4 mb-6">
-      <NuxtLink :to="`/psychologist/tests/${route.params.id}/submissions`" class="G-M text-gray-medium hover:text-green-dark transition">← Назад</NuxtLink>
-      <h1 class="text-3xl BP-B text-green-dark">Результат: {{ submission.client_name }}</h1>
+
+    <!-- Шапка -->
+    <div class="mb-6">
+      <NuxtLink :to="`/psychologist/tests/${route.params.id}/submissions`"
+        class="G-M text-gray-medium hover:text-green-dark transition text-sm">
+        ← Назад
+      </NuxtLink>
+      <h1 class="text-2xl sm:text-3xl BP-B text-green-dark mt-1 leading-[1.2]">
+        Результат: {{ submission.client_name }}
+      </h1>
     </div>
 
-    <!-- Кнопки отчётов -->
-    <div class="flex gap-3 mb-6 flex-wrap">
-      <button @click="downloadReport('docx', 'client')" class="px-6 text-xl py-2 cursor-pointer bg-green-bright text-white BP-B rounded hover:bg-green-dark transition">
+    <!-- Кнопки отчётов — в колонку на мобилке -->
+    <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-6">
+      <button @click="downloadReport('docx', 'client')"
+        class="px-4 sm:px-6 text-base sm:text-xl py-2 cursor-pointer bg-green-bright text-white BP-B rounded hover:bg-green-dark transition">
         Скачать DOCX (клиент)
       </button>
-      <button @click="downloadReport('docx', 'psychologist')" class="px-6 text-xl cursor-pointer py-2 bg-green-bright text-white BP-B rounded hover:bg-green-dark transition">
+      <button @click="downloadReport('docx', 'psychologist')"
+        class="px-4 sm:px-6 text-base sm:text-xl py-2 cursor-pointer bg-green-bright text-white BP-B rounded hover:bg-green-dark transition">
         Скачать DOCX (психолог)
       </button>
-      <button @click="downloadReport('html', 'client')" class="px-6 bg-white py-2 cursor-pointer border-2 border-gray-light text-gray-medium G-M rounded hover:border-green-dark hover:text-green-dark transition">
+      <button @click="downloadReport('html', 'client')"
+        class="px-4 sm:px-6 py-2 cursor-pointer bg-white border-2 border-gray-light text-gray-medium G-M rounded hover:border-green-dark hover:text-green-dark transition text-sm sm:text-base">
         Открыть HTML отчёт
       </button>
     </div>
 
     <!-- Данные клиента -->
-    <div class="bg-white rounded-2xl p-6 mb-7 card-test-shadows">
+    <div class="bg-white rounded-2xl p-4 sm:p-6 mb-4 sm:mb-7 card-test-shadows">
       <h2 class="text-xl BP-B text-green-dark mb-4">Данные клиента</h2>
       <div class="flex flex-col gap-3">
-        <div class="flex gap-4">
-          <span class="G-M text-gray-medium w-32">ФИО</span>
-          <span class="G-M text-green-dark">{{ submission.client_name }}</span>
+        <div class="flex gap-2 sm:gap-4">
+          <span class="G-M text-gray-medium w-24 sm:w-32 flex-shrink-0 text-sm">ФИО</span>
+          <span class="G-M text-green-dark text-sm">{{ submission.client_name }}</span>
         </div>
-        <div v-for="(value, key) in submission.client_data" :key="key" class="flex gap-4">
-          <span class="G-M text-gray-medium w-32">{{ key }}</span>
-          <span class="G-M text-green-dark">{{ value }}</span>
+        <div v-for="(value, key) in submission.client_data" :key="key" class="flex gap-2 sm:gap-4">
+          <span class="G-M text-gray-medium w-24 sm:w-32 flex-shrink-0 text-sm">{{ key }}</span>
+          <span class="G-M text-green-dark text-sm break-all">{{ value }}</span>
         </div>
-        <div class="flex gap-4">
-          <span class="G-M text-gray-medium w-32">Дата</span>
-          <span class="G-M text-green-dark">{{ formatDate(submission.created_at) }}</span>
+        <div class="flex gap-2 sm:gap-4">
+          <span class="G-M text-gray-medium w-24 sm:w-32 flex-shrink-0 text-sm">Дата</span>
+          <span class="G-M text-green-dark text-sm">{{ formatDate(submission.created_at) }}</span>
         </div>
       </div>
     </div>
 
     <!-- Метрики -->
-    <div class="bg-white rounded-2xl p-6 mb-7 card-test-shadows">
+    <div class="bg-white rounded-2xl p-4 sm:p-6 mb-4 sm:mb-7 card-test-shadows">
       <h2 class="text-xl BP-B text-green-dark mb-4">Результаты метрик</h2>
       <div class="flex flex-col gap-4">
-        <div v-for="metric in submission.metrics" :key="metric.name" class="border rounded-md border-gray-light p-4">
-          <div class="flex items-center justify-between mb-2">
-            <span class="BP-M text-green-dark">{{ metric.name }}</span>
-            <span class="text-2xl BP-B text-green-bright">{{ metric.value }}</span>
+        <div v-for="metric in submission.metrics" :key="metric.name"
+          class="border rounded-md border-gray-light p-3 sm:p-4">
+          <div class="flex items-center justify-between mb-2 gap-2">
+            <span class="BP-M text-green-dark text-sm sm:text-base">{{ metric.name }}</span>
+            <span class="text-xl sm:text-2xl BP-B text-green-bright flex-shrink-0">{{ metric.value }}</span>
           </div>
           <div v-if="metric.interpretation" class="bg-bg-light p-3 border-l-4 border-green-bright">
             <p class="text-sm G-M text-green-dark">{{ metric.interpretation.label }}</p>
@@ -55,15 +66,17 @@
     </div>
 
     <!-- Ответы клиента -->
-    <div class="bg-white rounded-2xl p-6 mb-7 card-test-shadows">
+    <div class="bg-white rounded-2xl p-4 sm:p-6 mb-4 sm:mb-7 card-test-shadows">
       <h2 class="text-xl BP-B text-green-dark mb-4">Ответы на вопросы</h2>
       <div class="flex flex-col gap-4">
-        <div v-for="answer in submission.answers" :key="answer.question_id" class="border-b border-bg-light pb-4">
+        <div v-for="answer in submission.answers" :key="answer.question_id"
+          class="border-b border-bg-light pb-4">
           <p class="text-sm G-M text-gray-medium mb-1">{{ answer.question_text }}</p>
-          <p class="G-M text-green-dark">{{ formatAnswer(answer.value) }}</p>
+          <p class="G-M text-green-dark text-sm sm:text-base">{{ formatAnswer(answer.value) }}</p>
         </div>
       </div>
     </div>
+
   </div>
 </template>
 

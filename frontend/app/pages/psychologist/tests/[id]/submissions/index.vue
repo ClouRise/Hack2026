@@ -1,11 +1,16 @@
 <template>
   <div>
-    <div class="flex items-center gap-4 mb-6">
-      <NuxtLink to="/psychologist/tests" class="G-M text-gray-medium hover:text-green-dark transition">← Назад</NuxtLink>
-      <h1 class="text-3xl BP-B text-green-dark">{{ testTitle }}</h1>
+    <!-- Шапка -->
+    <div class="mb-6">
+      <NuxtLink to="/psychologist/tests" class="G-M text-gray-medium hover:text-green-dark transition text-sm">
+        ← Назад
+      </NuxtLink>
+      <h1 class="text-2xl sm:text-3xl BP-B text-green-dark mt-1">{{ testTitle }}</h1>
     </div>
 
-    <div class="bg-white rounded-2xl overflow-hidden mb-4" style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
+    <!-- ДЕСКТОП (md+): таблица -->
+    <div class="hidden md:block bg-white rounded-2xl overflow-hidden mb-4"
+      style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
       <table class="w-full">
         <thead class="bg-bg-light border-b border-gray-light">
           <tr>
@@ -20,37 +25,26 @@
               Прохождений пока нет
             </td>
           </tr>
-          <tr
-            v-for="submission in submissions"
-            :key="submission.id"
-            class="border-b border-bg-light hover:bg-bg-light transition"
-          >
+          <tr v-for="submission in submissions" :key="submission.id"
+            class="border-b border-bg-light hover:bg-bg-light transition">
             <td class="px-6 py-4 BP-M text-green-dark text-lg">{{ submission.client_name }}</td>
             <td class="px-6 py-4 G-M text-gray-medium">{{ formatDate(submission.created_at) }}</td>
             <td class="px-6 py-4">
               <div class="flex items-center gap-3 flex-wrap">
-                <NuxtLink
-                  :to="`/psychologist/tests/${route.params.id}/submissions/${submission.id}`"
-                  class="text-sm cursor-pointer G-M text-green-bright hover:text-green-dark transition"
-                >
+                <NuxtLink :to="`/psychologist/tests/${route.params.id}/submissions/${submission.id}`"
+                  class="text-sm cursor-pointer G-M text-green-bright hover:text-green-dark transition">
                   Смотреть результат
                 </NuxtLink>
-                <button
-                  @click="downloadReport(submission.id, 'docx', 'client')"
-                  class="text-sm cursor-pointer G-M text-gray-medium hover:text-green-dark transition"
-                >
+                <button @click="downloadReport(submission.id, 'docx', 'client')"
+                  class="text-sm cursor-pointer G-M text-gray-medium hover:text-green-dark transition">
                   DOCX клиент
                 </button>
-                <button
-                  @click="downloadReport(submission.id, 'docx', 'psychologist')"
-                  class="text-sm G-M cursor-pointer text-gray-medium hover:text-green-dark transition"
-                >
+                <button @click="downloadReport(submission.id, 'docx', 'psychologist')"
+                  class="text-sm G-M cursor-pointer text-gray-medium hover:text-green-dark transition">
                   DOCX психолог
                 </button>
-                <button
-                  @click="downloadReport(submission.id, 'html', 'client')"
-                  class="text-sm G-M cursor-pointer text-gray-medium hover:text-green-dark transition"
-                >
+                <button @click="downloadReport(submission.id, 'html', 'client')"
+                  class="text-sm G-M cursor-pointer text-gray-medium hover:text-green-dark transition">
                   HTML
                 </button>
               </div>
@@ -60,15 +54,56 @@
       </table>
     </div>
 
-    <button
-      @click="fetchSubmissions"
-      class="px-4 py-2 border-2 border-gray-light bg-white text-gray-medium G-M rounded hover:border-green-dark hover:text-green-dark transition"
-    >
+    <!-- МОБИЛЬНЫЙ + ПЛАНШЕТ (< md): карточки -->
+    <div class="md:hidden flex flex-col gap-3 mb-4">
+      <div v-if="submissions.length === 0"
+        class="bg-white rounded-2xl p-8 text-center G-M text-gray-light"
+        style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
+        Прохождений пока нет
+      </div>
+
+      <div v-for="submission in submissions" :key="submission.id"
+        class="bg-white rounded-2xl p-3 flex flex-col gap-3"
+        style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
+
+        <!-- Имя + дата -->
+        <div class="flex items-start justify-between gap-2">
+          <p class="BP-M text-base text-green-dark leading-[1.2]">{{ submission.client_name }}</p>
+          <span class="flex-shrink-0 text-xs G-M text-gray-medium">
+            {{ formatDate(submission.created_at) }}
+          </span>
+        </div>
+
+        <!-- Действия -->
+        <div class="flex flex-col gap-2 border-t border-bg-light pt-2">
+          <NuxtLink :to="`/psychologist/tests/${route.params.id}/submissions/${submission.id}`"
+            class="text-sm cursor-pointer G-M text-green-bright hover:text-green-dark transition">
+            Смотреть результат
+          </NuxtLink>
+          <div class="flex items-center gap-3">
+            <button @click="downloadReport(submission.id, 'docx', 'client')"
+              class="text-xs cursor-pointer G-M text-gray-medium hover:text-green-dark transition">
+              DOCX клиент
+            </button>
+            <button @click="downloadReport(submission.id, 'docx', 'psychologist')"
+              class="text-xs G-M cursor-pointer text-gray-medium hover:text-green-dark transition">
+              DOCX психолог
+            </button>
+            <button @click="downloadReport(submission.id, 'html', 'client')"
+              class="text-xs G-M cursor-pointer text-gray-medium hover:text-green-dark transition">
+              HTML
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button @click="fetchSubmissions"
+      class="px-4 py-2 border-2 border-gray-light bg-white text-gray-medium G-M rounded hover:border-green-dark hover:text-green-dark transition text-sm">
       Обновить
     </button>
   </div>
 </template>
-
 <script setup lang="ts">
 definePageMeta({
   middleware: []

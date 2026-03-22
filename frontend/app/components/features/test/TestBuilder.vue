@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-4xl ">
     <!-- Мета-информация -->
-    <div class="bg-white rounded-2xl p-6 mb-4 card-test-shadows">
+    <div class="bg-white rounded-2xl p-4 sm:p-6 mb-4 card-test-shadows">
       <h2 class="text-xl BP-B text-green-dark mb-4">Основная информация</h2>
       <div class="flex flex-col gap-4">
         <div>
@@ -37,22 +37,26 @@
         <span class="text-sm G-M text-green-dark">ФИО</span>
         <span class="text-xs G-M text-gray-medium ml-auto">Обязательное</span>
       </div>
-      <div v-for="(field, index) in store.meta.client_fields" :key="index" class="flex items-center gap-2 mb-2">
-        <input v-model="field.label" type="text" placeholder="Название поля"
-          class="flex-1 px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright" />
-        <select v-model="field.type"
-          class="px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright">
-          <option value="text">Текст</option>
-          <option value="email">Email</option>
-          <option value="number">Число</option>
-          <option value="color">Цвет</option>
-        </select>
-        <label class="flex items-center gap-1 text-sm G-M text-gray-medium cursor-pointer">
-          <input v-model="field.required" type="checkbox" class="w-4 h-4 accent-green-500" />
-          Обяз.
-        </label>
-        <button @click="store.meta.client_fields.splice(index, 1)" class="text-bg-red hover:text-red-900 transition">✕</button>
-      </div>
+<div v-for="(field, index) in store.meta.client_fields" :key="index"
+  class="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+  <input v-model="field.label" type="text" placeholder="Название поля"
+    class="flex-1 px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright text-base" />
+  <select v-model="field.type"
+    class="px-3 py-2 bg-bg-light border-l-[5px] border-b-[2px] border-gray-light text-green-dark G-M focus:outline-none focus:border-green-bright text-base">
+    <option value="text">Текст</option>
+    <option value="email">Email</option>
+    <option value="number">Число</option>
+    <option value="color">Цвет</option>
+  </select>
+  <div class="flex items-center justify-between sm:justify-start gap-3">
+    <label class="flex items-center gap-1 text-sm G-M text-gray-medium cursor-pointer">
+      <input v-model="field.required" type="checkbox" class="w-4 h-4 accent-green-500" />
+      Обяз.
+    </label>
+    <button @click="store.meta.client_fields.splice(index, 1)"
+      class="text-bg-red hover:text-red-900 transition">✕</button>
+  </div>
+</div>
       <button @click="store.meta.client_fields.push({ label: '', type: 'text', required: false })"
         class="mt-2 text-sm G-M text-green-bright hover:text-green-dark transition">
         + Добавить поле
@@ -60,15 +64,18 @@
     </div>
 
    <!-- Секции -->
-<div v-for="section in store.sections" :key="section.id" class="bg-white rounded-2xl p-6 mb-4" style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
-  <div class="flex items-center justify-between mb-4">
-    <input v-model="section.title" type="text"
-      class="text-xl BP-B text-green-dark border-none outline-none bg-transparent w-full"
-      placeholder="Название раздела" />
-    <button @click="store.removeSection(section.id)" class="text-sm G-M text-red-400 hover:text-red-900 w-[200px] ml-2">
-      Удалить раздел
-    </button>
-  </div>
+<div v-for="section in store.sections" :key="section.id"
+  class="bg-white rounded-2xl p-4 sm:p-6 mb-4"
+  style="box-shadow: 0 4px 32px rgba(20,66,16,0.10);">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
+  <input v-model="section.title" type="text"
+    class="text-xl BP-B text-green-dark border-none outline-none bg-transparent w-full"
+    placeholder="Название раздела" />
+  <button @click="store.removeSection(section.id)"
+    class="text-sm G-M text-red-400 hover:text-red-900 sm:w-[200px] sm:ml-2 text-left sm:text-right">
+    Удалить раздел
+  </button>
+</div>
 
   <!-- ВОТ ЭТО МЕНЯЕМ -->
   <VueDraggable

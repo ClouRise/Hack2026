@@ -2,7 +2,7 @@
   <div class="bg-test-page fixed inset-0 overflow-hidden">
     <div class="h-full overflow-y-auto">
       <div class="flex items-center justify-center p-4 min-h-full">
-        <div class="bg-white rounded-lg w-[440px] card-test-shadows my-4">
+        <div class="bg-white rounded-lg w-full max-w-[440px] card-test-shadows my-4">
           <div class="p-6 relative">
             <button @click="toggleTheme"
               class="bg-white px-4 py-2 fixed right-[15px] top-[15px] cursor-pointer rounded-md transition-colors toggle-theme"
